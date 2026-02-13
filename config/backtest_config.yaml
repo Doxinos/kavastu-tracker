@@ -1,0 +1,106 @@
+# Phase 2 Backtest Configuration
+# Kavastu Strategy - Advanced Features
+
+# Basic Settings
+initial_capital: 100000
+rebalance_frequency: "weekly"  # "monthly" or "weekly"
+start_date: "2014-01-01"  # Kavastu's verified 38% CAGR period
+end_date: "2021-12-31"
+transaction_cost: 0.0025  # 0.25% per trade
+
+# Portfolio Settings
+max_holdings: 70  # Fixed max holdings (ignored if dynamic_regime enabled)
+
+# =====================================================
+# Phase 2 Features (Advanced)
+# =====================================================
+
+features:
+  # Feature 1: ATR-Based Position Sizing
+  atr_sizing:
+    enabled: true
+    account_risk_pct: 1.0     # % of portfolio to risk per position
+    atr_multiplier: 2.0       # ATR multiplier for stop distance
+    min_weight: 1.0           # Minimum position weight %
+    max_weight: 5.0           # Maximum position weight %
+
+  # Feature 2: Indicator Confirmation (RSI + MACD)
+  indicator_confirmation:
+    enabled: false
+    avoid_overbought: false   # Skip buying if RSI > 70
+    rsi_period: 14            # RSI calculation period
+    macd_fast: 12             # MACD fast EMA
+    macd_slow: 26             # MACD slow EMA
+    macd_signal: 9            # MACD signal line
+
+  # Feature 3: Dynamic Market Regime (0-80 stocks)
+  dynamic_regime:
+    enabled: true
+    max_holdings_strong_bull: 80   # Strong bull regime (75-100 pts)
+    max_holdings_bull: 60          # Bull regime (55-74 pts)
+    max_holdings_neutral: 40       # Neutral regime (35-54 pts)
+    max_holdings_bear: 20          # Bear regime (20-34 pts)
+    min_holdings_panic: 5          # Panic regime (0-19 pts)
+
+  # Feature 4: Conviction-Weighted Portfolio (Phase 2.5)
+  conviction_weighting:
+    enabled: false
+    tier1_count: 15              # Top N stocks (core portfolio)
+    tier1_weight_pct: 50.0       # % of capital in tier 1 (3.3% each)
+    tier2_count: 25              # Next N stocks (satellite)
+    tier2_weight_pct: 35.0       # % of capital in tier 2 (1.4% each)
+    tier3_weight_pct: 15.0       # % of capital in tier 3 (remaining stocks)
+    # Mimics Kavastu's top 10-12 = 40% structure
+
+  # Feature 5: MA Parameter Optimization
+  ma_optimization:
+    enabled: false
+    parameters: [50, 100, 200]  # [MA_fast, MA_medium, MA_slow]
+    # Alternative parameter sets to test:
+    # [40, 100, 180] - Faster reactions
+    # [60, 120, 220] - Slower, more stable
+    # [50, 120, 240] - Hybrid approach
+
+# =====================================================
+# Test Configurations
+# =====================================================
+
+# Baseline Test (Phase 1 only)
+test_baseline:
+  atr_sizing: false
+  indicator_confirmation: false
+  dynamic_regime: false
+
+# Individual Feature Tests
+test_atr_only:
+  atr_sizing: true
+  indicator_confirmation: false
+  dynamic_regime: false
+
+test_indicators_only:
+  atr_sizing: false
+  indicator_confirmation: true
+  dynamic_regime: false
+
+test_regime_only:
+  atr_sizing: false
+  indicator_confirmation: false
+  dynamic_regime: true
+
+# Full Phase 2 (All Features Enabled)
+test_phase2_full:
+  atr_sizing: true
+  indicator_confirmation: true
+  dynamic_regime: true
+
+# =====================================================
+# Notes
+# =====================================================
+# Expected Performance Impact (individual features):
+# - ATR Sizing: +2-5% CAGR, reduced volatility
+# - Indicators: +1.5-4% CAGR, better entry timing
+# - Dynamic Regime: +1.5-4% CAGR, risk management
+# - MA Optimization: +1-3% CAGR, parameter tuning
+#
+# Target: 18-22% CAGR (from current 11.06%)
+# Phase 1 Baseline: 11.06% CAGR (weekly, with fundamentals + dividends)
