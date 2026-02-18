@@ -27,3 +27,4 @@ Thumbs.db
 .env
 credentials.json
 config/credentials/
+data/*.db
