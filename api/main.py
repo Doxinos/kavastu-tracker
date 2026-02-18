@@ -792,6 +792,33 @@ def get_market_synthesis():
         return {'available': False, 'reason': str(e)}
 
 
+# --- Admin: Database sync endpoint ---
+
+from fastapi import UploadFile, File
+import shutil
+
+@app.post("/api/admin/upload-db")
+async def upload_database(file: UploadFile = File(...), secret: str = ""):
+    """Upload a SQLite database file to replace the current one."""
+    if secret != "kavastu2026sync":
+        return {"status": "error", "message": "Invalid secret"}
+    try:
+        db_path = Path(__file__).parent.parent / "data" / "portfolio.db"
+        db_path.parent.mkdir(parents=True, exist_ok=True)
+        # Close existing connection
+        db.conn.close()
+        with open(db_path, "wb") as f:
+            shutil.copyfileobj(file.file, f)
+        # Reconnect
+        import sqlite3
+        db.conn = sqlite3.connect(str(db_path))
+        db.conn.row_factory = sqlite3.Row
+        size = db_path.stat().st_size
+        return {"status": "ok", "size_bytes": size}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("api.main:app", host="0.0.0.0", port=8000, reload=True)
