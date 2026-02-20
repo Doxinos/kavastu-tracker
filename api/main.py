@@ -793,6 +793,91 @@ def get_market_synthesis():
 
 
 
+# --- Market Health Score ---
+
+@app.get("/api/market-health")
+def get_market_health():
+    """
+    Compute a 0-100 market health score from screener data.
+    0 = extreme bear, 50 = neutral, 100 = extreme bull.
+    """
+    with get_db() as db:
+        cursor = db.conn.cursor()
+        cursor.execute("""
+            SELECT trending_classification, score, trending_score
+            FROM screener_results
+            WHERE snapshot_id = (SELECT MAX(id) FROM weekly_snapshots)
+        """)
+        rows = [dict(r) for r in cursor.fetchall()]
+
+        if not rows:
+            return {'score': 50, 'label': 'No Data', 'detail': 'Run the screener to get market data'}
+
+        total = len(rows)
+        hot = sum(1 for r in rows if r['trending_classification'] == 'HOT')
+        cold = sum(1 for r in rows if r['trending_classification'] == 'COLD')
+        neutral = total - hot - cold
+
+        avg_score = sum(r['score'] for r in rows) / total
+        avg_trending = sum(r.get('trending_score', 50) or 50 for r in rows) / total
+
+        # Weighted health score (0-100)
+        # Factor 1: Hot/Cold ratio (0-40 points)
+        hot_pct = hot / total * 100
+        cold_pct = cold / total * 100
+        sentiment = min(40, max(0, (hot_pct - cold_pct + 50) * 0.4))
+
+        # Factor 2: Average trending score (0-30 points)
+        trending_component = (avg_trending / 100) * 30
+
+        # Factor 3: Average kavastu score (0-30 points)
+        score_component = min(30, (avg_score / 130) * 30)
+
+        health = round(sentiment + trending_component + score_component)
+        health = max(0, min(100, health))
+
+        if health >= 75:
+            label = 'Strong Bull'
+        elif health >= 60:
+            label = 'Bullish'
+        elif health >= 45:
+            label = 'Neutral'
+        elif health >= 30:
+            label = 'Bearish'
+        else:
+            label = 'Strong Bear'
+
+        return {
+            'score': health,
+            'label': label,
+            'hot_count': hot,
+            'cold_count': cold,
+            'neutral_count': neutral,
+            'total': total,
+            'avg_score': round(avg_score, 1),
+            'avg_trending': round(avg_trending, 1),
+        }
+
+
+# --- Admin: Database sync ---
+from fastapi import UploadFile, File
+import shutil
+
+@app.post("/api/admin/sync-db")
+async def sync_database(file: UploadFile = File(...), secret: str = ""):
+    """Sync local database to production."""
+    if secret != "kavastu2026sync":
+        return {"status": "error", "message": "Invalid secret"}
+    try:
+        db_path = Path(__file__).parent.parent / "data" / "portfolio.db"
+        db_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(db_path, "wb") as f:
+            shutil.copyfileobj(file.file, f)
+        return {"status": "ok", "size_bytes": db_path.stat().st_size}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("api.main:app", host="0.0.0.0", port=8000, reload=True)
