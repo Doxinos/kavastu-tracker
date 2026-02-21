@@ -811,7 +811,9 @@ def get_market_health():
         rows = [dict(r) for r in cursor.fetchall()]
 
         if not rows:
-            return {'score': 50, 'label': 'No Data', 'detail': 'Run the screener to get market data'}
+            return {'score': 50, 'label': 'No Data', 'hot_count': 0, 'cold_count': 0,
+                    'neutral_count': 0, 'total': 0, 'avg_score': 0, 'avg_trending': 0,
+                    'detail': 'Run the screener to get market data'}
 
         total = len(rows)
         hot = sum(1 for r in rows if r['trending_classification'] == 'HOT')
