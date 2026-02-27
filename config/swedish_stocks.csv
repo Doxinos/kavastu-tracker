@@ -6,112 +6,159 @@ ATCO-A.ST,Atlas Copco A,Industrials,Large,2026-02-05
 ATCO-B.ST,Atlas Copco B,Industrials,Large,2026-02-05
 AZN.ST,AstraZeneca,Healthcare,Large,2026-02-05
 BOL.ST,Boliden,Materials,Large,2026-02-05
-ESSITY-B.ST,Essity B,Consumer Staples,Large,2026-02-05
 EPI-B.ST,Epiroc B,Industrials,Large,2026-02-05
+EQT.ST,EQT AB,Financials,Large,2026-02-27
 ERIC-B.ST,Ericsson B,Technology,Large,2026-02-05
+ESSITY-B.ST,Essity B,Consumer Staples,Large,2026-02-05
+EVO.ST,Evolution Gaming,Consumer Discretionary,Large,2026-02-27
 GETI-B.ST,Getinge B,Healthcare,Large,2026-02-05
+HEXA-B.ST,Hexagon B,Technology,Large,2026-02-05
 HM-B.ST,H&M B,Consumer Discretionary,Large,2026-02-05
-HEXA-B.ST,Hexagon B,Industrials,Large,2026-02-05
+INDU-A.ST,Industrivarden A,Financials,Large,2026-02-27
+INDU-C.ST,Industrivarden C,Financials,Large,2026-02-27
 INVE-B.ST,Investor B,Financials,Large,2026-02-05
 KINV-B.ST,Kinnevik B,Financials,Large,2026-02-05
+LATO-B.ST,Latour B,Financials,Large,2026-02-27
+LIFCO-B.ST,Lifco B,Industrials,Large,2026-02-27
+LUND-B.ST,Lundbergforetagen B,Financials,Large,2026-02-27
 NDA-SE.ST,Nordea Bank,Financials,Large,2026-02-05
+SAAB-B.ST,Saab B,Industrials,Large,2026-02-27
 SAND.ST,Sandvik,Industrials,Large,2026-02-05
 SEB-A.ST,SEB A,Financials,Large,2026-02-05
 SECU-B.ST,Securitas B,Industrials,Large,2026-02-05
 SHB-A.ST,Handelsbanken A,Financials,Large,2026-02-05
 SKA-B.ST,Skanska B,Industrials,Large,2026-02-05
 SKF-B.ST,SKF B,Industrials,Large,2026-02-05
+SOBI.ST,Swedish Orphan Biovitrum,Healthcare,Large,2026-02-27
 SWED-A.ST,Swedbank A,Financials,Large,2026-02-05
-SWMA.ST,Swedish Match,Consumer Staples,Large,2026-02-05
 TEL2-B.ST,Tele2 B,Communication Services,Large,2026-02-05
+TELIA.ST,Telia Company,Communication Services,Large,2026-02-27
+VOLCAR-B.ST,Volvo Cars B,Consumer Discretionary,Large,2026-02-27
 VOLV-A.ST,Volvo A,Industrials,Large,2026-02-05
 VOLV-B.ST,Volvo B,Industrials,Large,2026-02-05
 AAK.ST,AAK,Consumer Staples,Mid,2026-02-05
-ADDTECH-B.ST,Addtech B,Industrials,Mid,2026-02-05
-ALIG-B.ST,Alligator Bioscience B,Healthcare,Mid,2026-02-05
-ALM.ST,Almii,Technology,Mid,2026-02-05
+ACAD.ST,AcadeMedia,Consumer Discretionary,Mid,2026-02-27
+ADDT-B.ST,Addtech B,Industrials,Mid,2026-02-27
+AFRY.ST,AFRY,Industrials,Mid,2026-02-27
+ALIF-B.ST,AddLife B,Healthcare,Mid,2026-02-27
+ALLEI.ST,Alleima,Materials,Mid,2026-02-27
+AQ.ST,AQ Group,Industrials,Mid,2026-02-27
 ATT.ST,Attendo,Healthcare,Mid,2026-02-27
-ATRLJ-B.ST,Atreljus B,Industrials,Mid,2026-02-05
+ATRLJ-B.ST,Atrium Ljungberg B,Real Estate,Mid,2026-02-27
 AXFO.ST,Axfood,Consumer Staples,Mid,2026-02-05
-BEIJ-B.ST,Beijer Alma B,Industrials,Mid,2026-02-05
-BETS-B.ST,BetsSon AB,Consumer Discretionary,Mid,2026-02-05
+AZA.ST,Avanza Bank,Financials,Mid,2026-02-27
+BALD-B.ST,Fastighets Balder B,Real Estate,Mid,2026-02-27
+BEIJ-B.ST,Beijer Ref B,Industrials,Mid,2026-02-27
+BETS-B.ST,Betsson B,Consumer Discretionary,Mid,2026-02-05
+BHG.ST,BHG Group,Consumer Discretionary,Mid,2026-02-27
 BILL.ST,Billerud,Materials,Mid,2026-02-05
-BMAX.ST,Byggmax,Consumer Discretionary,Mid,2026-02-27
-BULTEN.ST,Bulten,Industrials,Mid,2026-02-05
-BTS-B.ST,BTS Group B,Consumer Discretionary,Mid,2026-02-05
-CAST.ST,Cast B,Industrials,Mid,2026-02-05
+BIOA-B.ST,BioArctic B,Healthcare,Mid,2026-02-27
+BONEX.ST,BoneSupport,Healthcare,Mid,2026-02-27
+BOOZT.ST,Boozt,Consumer Discretionary,Mid,2026-02-27
+BRAV.ST,Bravida Holding,Industrials,Mid,2026-02-27
+BUFAB.ST,Bufab,Industrials,Mid,2026-02-27
+BURE.ST,Bure Equity,Financials,Mid,2026-02-27
+CAST.ST,Castellum,Real Estate,Mid,2026-02-27
 CATE.ST,Catena,Real Estate,Mid,2026-02-05
-CCC.ST,Collector AB,Financials,Mid,2026-02-05
-CORE-PREF.ST,CoreEmpresa Pref,Financials,Mid,2026-02-05
-DUNI.ST,Duni,Consumer Discretionary,Mid,2026-02-05
+CLAS-B.ST,Clas Ohlson B,Consumer Discretionary,Mid,2026-02-27
+CLA-B.ST,Cloetta B,Consumer Staples,Mid,2026-02-27
+DOM.ST,Dometic Group,Consumer Discretionary,Mid,2026-02-27
+EKTA-B.ST,Elekta B,Healthcare,Mid,2026-02-27
 ELUX-B.ST,Electrolux B,Consumer Discretionary,Mid,2026-02-05
-EVO.ST,Evolution Gaming,Consumer Discretionary,Mid,2026-02-05
+EMBRAC-B.ST,Embracer Group B,Technology,Mid,2026-02-27
 FABG.ST,Fabege,Real Estate,Mid,2026-02-05
-FING-B.ST,Fingerprint Cards B,Technology,Mid,2026-02-05
-GARO.ST,Garo,Industrials,Mid,2026-02-05
-GPOP.ST,Gaming Corp,Consumer Discretionary,Mid,2026-02-05
-HANZA.ST,Hanza,Industrials,Mid,2026-02-05
-HEAT.ST,Heat B,Industrials,Mid,2026-02-05
-HMS.ST,HMS Networks,Technology,Mid,2026-02-05
+GRNG.ST,Granges,Materials,Mid,2026-02-27
+HEM.ST,Hemnet Group,Technology,Mid,2026-02-27
+HOLM-B.ST,Holmen B,Materials,Mid,2026-02-27
 HPOL-B.ST,Hexpol B,Materials,Mid,2026-02-05
-HUF-B.ST,Hufvudstaden B,Real Estate,Mid,2026-02-05
+HTRO.ST,Hexatronic Group,Technology,Mid,2026-02-27
+HUFV-A.ST,Hufvudstaden A,Real Estate,Mid,2026-02-27
 HUSQ-B.ST,Husqvarna B,Consumer Discretionary,Mid,2026-02-05
-ICA.ST,ICA Gruppen,Consumer Staples,Mid,2026-02-05
-INDU-A.ST,Industrivärden A,Financials,Mid,2026-02-05
-INDU-C.ST,Industrivärden C,Financials,Mid,2026-02-05
-IVSO.ST,Indutrade,Industrials,Mid,2026-02-05
+INDT.ST,Indutrade,Industrials,Mid,2026-02-27
+INSTAL.ST,Instalco,Industrials,Mid,2026-02-27
+INTRUM.ST,Intrum,Financials,Mid,2026-02-27
+INWI.ST,Inwido,Industrials,Mid,2026-02-27
 JM.ST,JM,Real Estate,Mid,2026-02-05
-KAHL.ST,Kahl,Consumer Discretionary,Mid,2026-02-05
-KIND-SDB.ST,Kindred Group,Consumer Discretionary,Mid,2026-02-05
 LAGR-B.ST,Lagercrantz B,Industrials,Mid,2026-02-05
-LIFCO-B.ST,Lifco B,Industrials,Mid,2026-02-05
-LUND-B.ST,Lundbergföretagen B,Financials,Mid,2026-02-05
+LIAB.ST,Lindab International,Industrials,Mid,2026-02-27
+LOOMIS.ST,Loomis,Industrials,Mid,2026-02-27
+MEKO.ST,Meko,Consumer Discretionary,Mid,2026-02-27
+MIPS.ST,MIPS,Consumer Discretionary,Mid,2026-02-27
+MTRS.ST,Munters Group,Industrials,Mid,2026-02-27
 MYCR.ST,Mycronic,Technology,Mid,2026-02-05
 NCC-B.ST,NCC B,Industrials,Mid,2026-02-05
+NEWA-B.ST,New Wave Group B,Consumer Discretionary,Mid,2026-02-27
 NIBE-B.ST,Nibe B,Industrials,Mid,2026-02-05
-PEAB-B.ST,Peab B,Real Estate,Mid,2026-02-05
+NOBA.ST,NOBA Bank Group,Financials,Mid,2026-02-27
+NOLA-B.ST,Nolato B,Industrials,Mid,2026-02-27
+NP3.ST,NP3 Fastigheter,Real Estate,Mid,2026-02-27
+NYF.ST,Nyfosa,Real Estate,Mid,2026-02-27
+OEM-B.ST,OEM International B,Industrials,Mid,2026-02-27
+PNDX-B.ST,Pandox B,Real Estate,Mid,2026-02-27
+PDX.ST,Paradox Interactive,Technology,Mid,2026-02-27
+PEAB-B.ST,Peab B,Industrials,Mid,2026-02-05
 RESURS.ST,Resurs Bank,Financials,Mid,2026-02-05
-SAAB-B.ST,Saab B,Industrials,Mid,2026-02-05
-SAGA-A.ST,Saga A,Consumer Staples,Mid,2026-02-05
+RUSTA.ST,Rusta,Consumer Discretionary,Mid,2026-02-27
+SAGA-B.ST,Sagax B,Real Estate,Mid,2026-02-27
+SAVE.ST,Nordnet,Financials,Mid,2026-02-27
+SBB-B.ST,Samhallsbyggnadsbolaget B,Real Estate,Mid,2026-02-27
+SCA-B.ST,SCA B,Materials,Mid,2026-02-27
+SDIP-B.ST,Sdiptech B,Industrials,Mid,2026-02-27
+SECT-B.ST,Sectra B,Technology,Mid,2026-02-27
+SF.ST,Stillfront Group,Technology,Mid,2026-02-27
 SINCH.ST,Sinch,Technology,Mid,2026-02-05
 SSAB-A.ST,SSAB A,Materials,Mid,2026-02-05
 SSAB-B.ST,SSAB B,Materials,Mid,2026-02-05
-STER.ST,Stora Enso R,Materials,Mid,2026-02-05
+STOR-B.ST,Storskogen Group B,Industrials,Mid,2026-02-27
 SWEC-B.ST,Sweco B,Industrials,Mid,2026-02-05
-TELIA.ST,Telia Company,Communication Services,Mid,2026-02-05
+SYSR.ST,Systemair,Industrials,Mid,2026-02-27
+THULE.ST,Thule Group,Consumer Discretionary,Mid,2026-02-27
 TREL-B.ST,Trelleborg B,Industrials,Mid,2026-02-05
+TROAX.ST,Troax Group,Industrials,Mid,2026-02-27
+VIMIAN.ST,Vimian Group,Healthcare,Mid,2026-02-27
 VITR.ST,Vitrolife,Healthcare,Mid,2026-02-05
-VPAB-B.ST,Veteranpoolen B,Industrials,Small,2026-02-27
+WALL-B.ST,Wallenstam B,Real Estate,Mid,2026-02-27
 WIHL.ST,Wihlborgs,Real Estate,Mid,2026-02-05
-ZINZ-SDB.ST,ZinZino,Consumer Staples,Mid,2026-02-05
-ACTIC.ST,Actic Group,Consumer Discretionary,Small,2026-02-05
-ADDT.ST,Addvise,Technology,Small,2026-02-05
-AGTIRA-B.ST,Agtira B,Industrials,Small,2026-02-05
-ALIF-B.ST,Alimak B,Industrials,Small,2026-02-05
+FNOX.ST,Fortnox,Technology,Mid,2026-02-27
+HACK.ST,Hacksaw,Technology,Mid,2026-02-27
+ASMDEE-B.ST,Asmodee Group B,Consumer Discretionary,Mid,2026-02-27
+ROKO-B.ST,Roko B,Industrials,Mid,2026-02-27
 AMBEA.ST,Ambea,Healthcare,Small,2026-02-05
-ANOD-B.ST,Anoto B,Technology,Small,2026-02-05
 ARISE.ST,Arise,Utilities,Small,2026-02-05
-ATRIUM.ST,Atrium Ljungberg,Real Estate,Small,2026-02-05
 BALCO.ST,Balco,Industrials,Small,2026-02-05
 BEIA-B.ST,Beijer Electronics B,Technology,Small,2026-02-05
 BERGMAN.ST,Bergman & Beving,Industrials,Small,2026-02-05
-BIOT.ST,BioInvent,Healthcare,Small,2026-02-05
-BOOZT.ST,Boozt,Consumer Discretionary,Small,2026-02-05
-BOUL.ST,Bouvet,Technology,Small,2026-02-05
+BMAX.ST,Byggmax,Consumer Discretionary,Small,2026-02-27
 BRIN-B.ST,Brinova B,Real Estate,Small,2026-02-05
+BTS-B.ST,BTS Group B,Consumer Discretionary,Small,2026-02-05
+BULTEN.ST,Bulten,Industrials,Small,2026-02-05
 CARY.ST,Cary Group,Industrials,Small,2026-02-05
+CEVI.ST,CellaVision,Healthcare,Small,2026-02-27
 CIBUS.ST,Cibus Nordic,Real Estate,Small,2026-02-05
-CLA-B.ST,Cloetta B,Consumer Staples,Small,2026-02-27
-COIC.ST,Coeli AB,Financials,Small,2026-02-05
 COOR.ST,Coor Service,Industrials,Small,2026-02-05
 CTM.ST,CTT Systems,Industrials,Small,2026-02-05
 DIOS.ST,Dios Fastigheter,Real Estate,Small,2026-02-05
-DOM.ST,Dometic Group,Consumer Discretionary,Small,2026-02-05
-DORO.ST,Doro,Technology,Small,2026-02-05
-DUNI.ST,Duni AB,Consumer Discretionary,Small,2026-02-05
-ECPI-B.ST,Ecopol B,Materials,Small,2026-02-05
-ENEA.ST,Enea,Technology,Small,2026-02-05
-EQT.ST,EQT AB,Financials,Small,2026-02-05
+DUNI.ST,Duni,Consumer Discretionary,Small,2026-02-05
+DUST.ST,Dustin Group,Technology,Small,2026-02-27
 EOLU-B.ST,Eolus Vind B,Utilities,Small,2026-02-05
+EWRK.ST,Ework Group,Industrials,Small,2026-02-27
+FPAR-A.ST,FastPartner A,Real Estate,Small,2026-02-27
+FING-B.ST,Fingerprint Cards B,Technology,Small,2026-02-05
+GARO.ST,Garo,Industrials,Small,2026-02-05
+HANZA.ST,Hanza,Industrials,Small,2026-02-05
+HMS.ST,HMS Networks,Technology,Small,2026-02-05
+IVSO.ST,Invisio,Industrials,Small,2026-02-27
+KNOW.ST,Knowit,Technology,Small,2026-02-27
+MCOV-B.ST,Medicover B,Healthcare,Small,2026-02-27
+MMGR-B.ST,Momentum Group B,Industrials,Small,2026-02-27
+NMAN.ST,Nederman Holding,Industrials,Small,2026-02-27
 NOTE.ST,Note AB,Technology,Small,2026-02-05
+PACT.ST,Proact IT Group,Technology,Small,2026-02-27
+PLAZ-B.ST,Platzer Fastigheter B,Real Estate,Small,2026-02-27
+RUG.ST,RugVista Group,Consumer Discretionary,Small,2026-02-27
+STORY-B.ST,Storytel B,Communication Services,Small,2026-02-27
+TOBII.ST,Tobii,Technology,Small,2026-02-27
+VIT-B.ST,Vitec Software B,Technology,Small,2026-02-27
+VPAB-B.ST,Veteranpoolen B,Industrials,Small,2026-02-27
+VPLAY-B.ST,Viaplay Group B,Communication Services,Small,2026-02-27
 24E.ST,24Storage,Real Estate,Small,2026-02-05
