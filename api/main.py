@@ -925,6 +925,80 @@ def screener_status(secret: str = ""):
     return _screener_status
 
 
+# --- Admin: Daily price refresh (lightweight) ---
+
+_price_status = {"running": False, "last_run": None, "last_result": None}
+
+def _refresh_prices_task():
+    """Background task that refreshes prices for all stocks in the database."""
+    global _price_status
+    _price_status["running"] = True
+    try:
+        import time
+        from src.data_fetcher import fetch_stock_data
+        db = PortfolioDB()
+        conn = db._connect()
+
+        # Get all tickers from the latest screener results
+        rows = conn.execute("""
+            SELECT DISTINCT ticker FROM screener_results
+            WHERE date = (SELECT MAX(date) FROM screener_results)
+        """).fetchall()
+        conn.close()
+
+        if not rows:
+            _price_status["last_result"] = "no stocks in database"
+            return
+
+        tickers = [r[0] for r in rows]
+        updated = 0
+
+        for ticker in tickers:
+            try:
+                df = fetch_stock_data(ticker, period="5d")
+                if df is not None and not df.empty:
+                    price = float(df['Close'].iloc[-1])
+                    conn = db._connect()
+                    conn.execute("""
+                        UPDATE screener_results SET price = ?
+                        WHERE ticker = ? AND date = (SELECT MAX(date) FROM screener_results)
+                    """, (price, ticker))
+                    conn.commit()
+                    conn.close()
+                    updated += 1
+                time.sleep(0.15)
+            except Exception:
+                continue
+
+        _price_status["last_run"] = datetime.now().isoformat()
+        _price_status["last_result"] = f"success: {updated}/{len(tickers)} prices updated"
+    except Exception as e:
+        _price_status["last_result"] = f"error: {e}"
+    finally:
+        _price_status["running"] = False
+
+@app.post("/api/admin/refresh-prices")
+def refresh_prices(background_tasks: BackgroundTasks, secret: str = ""):
+    """Trigger a lightweight daily price refresh for all tracked stocks."""
+    if secret != "kavastu2026sync":
+        return {"status": "error", "message": "Invalid secret"}
+    if _price_status["running"]:
+        return {"status": "already_running"}
+    background_tasks.add_task(_refresh_prices_task)
+    return {
+        "status": "started",
+        "message": "Price refresh started. Takes ~2 minutes.",
+        "last_run": _price_status["last_run"],
+    }
+
+@app.get("/api/admin/price-status")
+def price_status(secret: str = ""):
+    """Check daily price refresh status."""
+    if secret != "kavastu2026sync":
+        return {"status": "error", "message": "Invalid secret"}
+    return _price_status
+
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("api.main:app", host="0.0.0.0", port=8000, reload=True)
