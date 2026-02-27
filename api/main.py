@@ -12,7 +12,7 @@ from pathlib import Path
 from datetime import datetime
 from typing import Optional, List
 
-from fastapi import FastAPI, Query
+from fastapi import FastAPI, Query, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
@@ -878,6 +878,51 @@ async def sync_database(file: UploadFile = File(...), secret: str = ""):
         return {"status": "ok", "size_bytes": db_path.stat().st_size}
     except Exception as e:
         return {"status": "error", "message": str(e)}
+
+
+# --- Admin: Run screener (cloud automation) ---
+
+_screener_status = {"running": False, "last_run": None, "last_result": None}
+
+def _run_screener_task(portfolio_value: float, cash: float):
+    """Background task that runs the full screener automation."""
+    global _screener_status
+    _screener_status["running"] = True
+    try:
+        from scripts.weekly_automation import run_weekly_automation
+        run_weekly_automation(portfolio_value=portfolio_value, cash=cash)
+        _screener_status["last_run"] = datetime.now().isoformat()
+        _screener_status["last_result"] = "success"
+    except Exception as e:
+        _screener_status["last_result"] = f"error: {e}"
+    finally:
+        _screener_status["running"] = False
+
+@app.post("/api/admin/run-screener")
+def run_screener(
+    background_tasks: BackgroundTasks,
+    secret: str = "",
+    portfolio_value: float = 100000,
+    cash: float = 10000,
+):
+    """Trigger the full screener + MarketMate automation as a background task."""
+    if secret != "kavastu2026sync":
+        return {"status": "error", "message": "Invalid secret"}
+    if _screener_status["running"]:
+        return {"status": "already_running", "message": "Screener is already running"}
+    background_tasks.add_task(_run_screener_task, portfolio_value, cash)
+    return {
+        "status": "started",
+        "message": "Screener started in background. Takes ~15-20 minutes.",
+        "last_run": _screener_status["last_run"],
+    }
+
+@app.get("/api/admin/screener-status")
+def screener_status(secret: str = ""):
+    """Check if the screener is currently running."""
+    if secret != "kavastu2026sync":
+        return {"status": "error", "message": "Invalid secret"}
+    return _screener_status
 
 
 if __name__ == "__main__":
