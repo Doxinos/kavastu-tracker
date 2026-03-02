@@ -999,6 +999,34 @@ def price_status(secret: str = ""):
     return _price_status
 
 
+# --- Public Price Refresh (rate-limited, no secret needed) ---
+
+_last_public_refresh = None
+
+@app.post("/api/refresh-prices")
+def public_refresh_prices(background_tasks: BackgroundTasks):
+    """User-triggered price refresh. Rate-limited to once every 5 minutes."""
+    global _last_public_refresh
+    now = datetime.now()
+    if _last_public_refresh and (now - _last_public_refresh).total_seconds() < 300:
+        remaining = 300 - int((now - _last_public_refresh).total_seconds())
+        return {"status": "rate_limited", "message": f"Please wait {remaining}s before refreshing again", "remaining": remaining}
+    if _price_status["running"]:
+        return {"status": "already_running", "message": "Price refresh already in progress"}
+    _last_public_refresh = now
+    background_tasks.add_task(_refresh_prices_task)
+    return {"status": "started", "message": "Price refresh started. Takes ~2 minutes."}
+
+@app.get("/api/refresh-prices/status")
+def public_refresh_status():
+    """Check price refresh status (public)."""
+    return {
+        "running": _price_status["running"],
+        "last_run": _price_status["last_run"],
+        "last_result": _price_status["last_result"],
+    }
+
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("api.main:app", host="0.0.0.0", port=8000, reload=True)
