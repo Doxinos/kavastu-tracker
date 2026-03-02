@@ -413,7 +413,9 @@ class StockSearchResult(BaseModel):
 @app.get("/api/search", response_model=List[StockSearchResult])
 def search_stocks(q: str = Query(..., min_length=1, description="Search query (ticker or company name)")):
     """Search stocks by ticker or company name from the universe CSV."""
-    csv_path = Path(__file__).parent.parent / "config" / "swedish_stocks.csv"
+    csv_path = Path(__file__).parent.parent / "config" / "nordic_stocks.csv"
+    if not csv_path.exists():
+        csv_path = Path(__file__).parent.parent / "config" / "swedish_stocks.csv"
     if not csv_path.exists():
         return []
 
