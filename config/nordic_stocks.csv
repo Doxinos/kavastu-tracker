@@ -196,3 +196,53 @@ AKSO.OL,Aker Solutions,Energy,Small,2026-03-02
 ELK.OL,Elkem,Materials,Small,2026-03-02
 SCATC.OL,Scatec,Utilities,Small,2026-03-02
 BRG.OL,Borregaard,Materials,Small,2026-03-02
+AAPL,Apple,Technology,Large,2026-03-02
+MSFT,Microsoft,Technology,Large,2026-03-02
+NVDA,Nvidia,Technology,Large,2026-03-02
+AMZN,Amazon,Consumer Discretionary,Large,2026-03-02
+GOOGL,Alphabet,Communication Services,Large,2026-03-02
+META,Meta Platforms,Communication Services,Large,2026-03-02
+TSLA,Tesla,Consumer Discretionary,Large,2026-03-02
+AMD,AMD,Technology,Large,2026-03-02
+AVGO,Broadcom,Technology,Large,2026-03-02
+CRM,Salesforce,Technology,Large,2026-03-02
+NFLX,Netflix,Communication Services,Large,2026-03-02
+ADBE,Adobe,Technology,Large,2026-03-02
+NOW,ServiceNow,Technology,Large,2026-03-02
+SNOW,Snowflake,Technology,Large,2026-03-02
+PLTR,Palantir,Technology,Large,2026-03-02
+CRWD,CrowdStrike,Technology,Large,2026-03-02
+PANW,Palo Alto Networks,Technology,Large,2026-03-02
+UBER,Uber,Technology,Large,2026-03-02
+SHOP,Shopify,Technology,Large,2026-03-02
+ASML,ASML,Technology,Large,2026-03-02
+MRVL,Marvell Technology,Technology,Large,2026-03-02
+KLAC,KLA Corp,Technology,Large,2026-03-02
+LRCX,Lam Research,Technology,Large,2026-03-02
+AMAT,Applied Materials,Technology,Large,2026-03-02
+JPM,JPMorgan Chase,Financials,Large,2026-03-02
+GS,Goldman Sachs,Financials,Large,2026-03-02
+V,Visa,Financials,Large,2026-03-02
+MA,Mastercard,Financials,Large,2026-03-02
+BRK-B,Berkshire Hathaway B,Financials,Large,2026-03-02
+UNH,UnitedHealth,Healthcare,Large,2026-03-02
+LLY,Eli Lilly,Healthcare,Large,2026-03-02
+ABBV,AbbVie,Healthcare,Large,2026-03-02
+ISRG,Intuitive Surgical,Healthcare,Large,2026-03-02
+XOM,ExxonMobil,Energy,Large,2026-03-02
+CVX,Chevron,Energy,Large,2026-03-02
+SLB,SLB,Energy,Large,2026-03-02
+CAT,Caterpillar,Industrials,Large,2026-03-02
+GE,GE Aerospace,Industrials,Large,2026-03-02
+LMT,Lockheed Martin,Industrials,Large,2026-03-02
+RTX,RTX Corp,Industrials,Large,2026-03-02
+COST,Costco,Consumer Staples,Large,2026-03-02
+HD,Home Depot,Consumer Discretionary,Large,2026-03-02
+NKE,Nike,Consumer Discretionary,Large,2026-03-02
+SBUX,Starbucks,Consumer Discretionary,Large,2026-03-02
+MCD,McDonalds,Consumer Discretionary,Large,2026-03-02
+COIN,Coinbase,Financials,Large,2026-03-02
+AXON,Axon Enterprise,Industrials,Large,2026-03-02
+DKNG,DraftKings,Consumer Discretionary,Large,2026-03-02
+MSTR,MicroStrategy,Technology,Large,2026-03-02
+CELH,Celsius Holdings,Consumer Staples,Large,2026-03-02
