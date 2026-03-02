@@ -97,7 +97,6 @@ OEM-B.ST,OEM International B,Industrials,Mid,2026-02-27
 PNDX-B.ST,Pandox B,Real Estate,Mid,2026-02-27
 PDX.ST,Paradox Interactive,Technology,Mid,2026-02-27
 PEAB-B.ST,Peab B,Industrials,Mid,2026-02-05
-RESURS.ST,Resurs Bank,Financials,Mid,2026-02-05
 RUSTA.ST,Rusta,Consumer Discretionary,Mid,2026-02-27
 SAGA-B.ST,Sagax B,Real Estate,Mid,2026-02-27
 SAVE.ST,Nordnet,Financials,Mid,2026-02-27
@@ -127,7 +126,7 @@ AMBEA.ST,Ambea,Healthcare,Small,2026-02-05
 ARISE.ST,Arise,Utilities,Small,2026-02-05
 BALCO.ST,Balco,Industrials,Small,2026-02-05
 BEIA-B.ST,Beijer Electronics B,Technology,Small,2026-02-05
-BERGMAN.ST,Bergman & Beving,Industrials,Small,2026-02-05
+BERG-B.ST,Bergman & Beving B,Industrials,Small,2026-02-27
 BMAX.ST,Byggmax,Consumer Discretionary,Small,2026-02-27
 BRIN-B.ST,Brinova B,Real Estate,Small,2026-02-05
 BTS-B.ST,BTS Group B,Consumer Discretionary,Small,2026-02-05
@@ -161,4 +160,3 @@ TOBII.ST,Tobii,Technology,Small,2026-02-27
 VIT-B.ST,Vitec Software B,Technology,Small,2026-02-27
 VPAB-B.ST,Veteranpoolen B,Industrials,Small,2026-02-27
 VPLAY-B.ST,Viaplay Group B,Communication Services,Small,2026-02-27
-24E.ST,24Storage,Real Estate,Small,2026-02-05
