@@ -29,6 +29,13 @@ app = FastAPI(
     version="1.0.0"
 )
 
+# Ensure database tables exist on startup (handles Railway ephemeral filesystem)
+try:
+    _startup_db = PortfolioDB()
+    _startup_db.conn.close()
+except Exception:
+    pass
+
 # Allow CORS for frontend (localhost + local network + Vercel production)
 app.add_middleware(
     CORSMiddleware,
