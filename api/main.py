@@ -866,18 +866,96 @@ def get_market_health():
 # --- Admin: Database sync ---
 from fastapi import UploadFile, File
 import shutil
+import sqlite3
+import tempfile
+
+# Tables that contain system/screener data (safe to replace from uploaded DB)
+_SYSTEM_TABLES = {"screener_results", "weekly_snapshots", "market_analysis"}
+# Tables that contain user-entered data (must be preserved on production)
+_USER_TABLES = {"profiles", "portfolio_config", "trade_history", "holdings", "watchlist"}
 
 @app.post("/api/admin/sync-db")
-async def sync_database(file: UploadFile = File(...), secret: str = ""):
-    """Sync local database to production."""
+async def sync_database(file: UploadFile = File(...), secret: str = "", mode: str = "merge"):
+    """
+    Sync local database to production.
+    mode=merge (default): Replace system tables, preserve user data.
+    mode=full: Replace entire database (destructive, use with caution).
+    """
     if secret != "kavastu2026sync":
         return {"status": "error", "message": "Invalid secret"}
     try:
         db_path = Path(__file__).parent.parent / "data" / "portfolio.db"
         db_path.parent.mkdir(parents=True, exist_ok=True)
-        with open(db_path, "wb") as f:
-            shutil.copyfileobj(file.file, f)
-        return {"status": "ok", "size_bytes": db_path.stat().st_size}
+
+        if mode == "full":
+            # Full replace (old behavior)
+            with open(db_path, "wb") as f:
+                shutil.copyfileobj(file.file, f)
+            return {"status": "ok", "mode": "full", "size_bytes": db_path.stat().st_size}
+
+        # Merge mode: save uploaded DB to temp file, then merge
+        with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as tmp:
+            tmp_path = tmp.name
+            shutil.copyfileobj(file.file, tmp)
+
+        try:
+            uploaded = sqlite3.connect(tmp_path)
+            production = sqlite3.connect(str(db_path))
+
+            stats = {}
+
+            # Replace system tables from uploaded DB
+            for table in _SYSTEM_TABLES:
+                try:
+                    # Check if table exists in uploaded DB
+                    uploaded.execute(f"SELECT 1 FROM [{table}] LIMIT 1")
+                except sqlite3.OperationalError:
+                    continue
+
+                # Clear production table and copy from uploaded
+                production.execute(f"DELETE FROM [{table}]")
+                rows = uploaded.execute(f"SELECT * FROM [{table}]").fetchall()
+                if rows:
+                    cols = [d[0] for d in uploaded.execute(f"SELECT * FROM [{table}] LIMIT 1").description]
+                    placeholders = ",".join(["?"] * len(cols))
+                    production.executemany(
+                        f"INSERT INTO [{table}] ({','.join(cols)}) VALUES ({placeholders})",
+                        rows
+                    )
+                stats[table] = {"synced": len(rows)}
+
+            # For user tables: only insert rows from uploaded DB that don't exist yet
+            # This ensures user data on production is never deleted
+            for table in _USER_TABLES:
+                try:
+                    uploaded.execute(f"SELECT 1 FROM [{table}] LIMIT 1")
+                except sqlite3.OperationalError:
+                    continue
+
+                # Check if production table is empty (fresh deploy)
+                prod_count = production.execute(f"SELECT COUNT(*) FROM [{table}]").fetchone()[0]
+                if prod_count == 0:
+                    # Production table is empty (fresh deploy), seed from uploaded DB
+                    rows = uploaded.execute(f"SELECT * FROM [{table}]").fetchall()
+                    if rows:
+                        cols = [d[0] for d in uploaded.execute(f"SELECT * FROM [{table}] LIMIT 1").description]
+                        placeholders = ",".join(["?"] * len(cols))
+                        production.executemany(
+                            f"INSERT INTO [{table}] ({','.join(cols)}) VALUES ({placeholders})",
+                            rows
+                        )
+                    stats[table] = {"seeded": len(rows)}
+                else:
+                    stats[table] = {"preserved": prod_count}
+
+            production.commit()
+            uploaded.close()
+            production.close()
+
+            return {"status": "ok", "mode": "merge", "tables": stats}
+        finally:
+            Path(tmp_path).unlink(missing_ok=True)
+
     except Exception as e:
         return {"status": "error", "message": str(e)}
 
