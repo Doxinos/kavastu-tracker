@@ -1017,14 +1017,12 @@ def _refresh_prices_task():
         import time
         from src.data_fetcher import fetch_stock_data
         db = PortfolioDB()
-        conn = db._connect()
 
         # Get all tickers from the latest screener results
-        rows = conn.execute("""
+        rows = db.conn.execute("""
             SELECT DISTINCT ticker FROM screener_results
             WHERE date = (SELECT MAX(date) FROM screener_results)
         """).fetchall()
-        conn.close()
 
         if not rows:
             _price_status["last_result"] = "no stocks in database"
@@ -1038,13 +1036,11 @@ def _refresh_prices_task():
                 df = fetch_stock_data(ticker, period="5d")
                 if df is not None and not df.empty:
                     price = float(df['Close'].iloc[-1])
-                    conn = db._connect()
-                    conn.execute("""
+                    db.conn.execute("""
                         UPDATE screener_results SET price = ?
                         WHERE ticker = ? AND date = (SELECT MAX(date) FROM screener_results)
                     """, (price, ticker))
-                    conn.commit()
-                    conn.close()
+                    db.conn.commit()
                     updated += 1
                 time.sleep(0.15)
             except Exception:
