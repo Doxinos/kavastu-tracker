@@ -52,8 +52,13 @@ def generate_market_synthesis() -> Dict:
                 'reason': 'Ingen MarketMate-video analyserad ännu',
             }
 
-        # Get latest MarketMate website buy signals
-        mm_website = [a for a in all_analyses if a.get('source_type') == 'website']
+        # Get MarketMate website buy signals from the same period as the latest video
+        # Only include website analyses from the video date onward (not old ones)
+        video_date = mm_youtube.get('date', '')
+        mm_website = [
+            a for a in all_analyses
+            if a.get('source_type') == 'website' and a.get('date', '') >= video_date
+        ]
         mm_buy_tickers = set()
         mm_sell_tickers = set()
         for a in mm_website:
