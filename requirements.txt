@@ -10,3 +10,5 @@ PyYAML>=6.0
 python-dotenv>=1.0.0
 python-multipart>=0.0.6
 yfinance>=0.2.0
+youtube-transcript-api>=1.0.0
+lxml>=5.0.0
