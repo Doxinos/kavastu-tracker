@@ -521,6 +521,7 @@ class MarketAnalysisResponse(BaseModel):
     url: Optional[str] = ""
     regime: Optional[str] = ""
     summary: Optional[str] = ""
+    executive_summary: Optional[str] = ""
     tickers_mentioned: Optional[list] = []
     buy_signals: Optional[list] = []
     sell_signals: Optional[list] = []
@@ -540,6 +541,7 @@ def get_market_analyses(limit: int = Query(20, ge=1, le=100), source: Optional[s
             'url': a.get('url', ''),
             'regime': a.get('regime', ''),
             'summary': a.get('summary', ''),
+            'executive_summary': a.get('executive_summary', ''),
             'tickers_mentioned': a.get('tickers_mentioned', []),
             'buy_signals': a.get('buy_signals', []),
             'sell_signals': a.get('sell_signals', []),

@@ -76,78 +76,77 @@ def fetch_youtube_transcript(video_id: str) -> Optional[str]:
         return None
 
 
+def _scrape_videos_from_page(channel_handle: str, max_results: int = 5) -> List[Dict]:
+    """Scrape video IDs and titles directly from the YouTube channel page."""
+    try:
+        resp = requests.get(
+            f"https://www.youtube.com/@{channel_handle}/videos",
+            headers={"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"},
+            timeout=15,
+        )
+        if resp.status_code != 200:
+            return []
+
+        video_ids = list(dict.fromkeys(re.findall(r'"videoId":"([a-zA-Z0-9_-]{11})"', resp.text)))
+        titles = re.findall(r'"title":\{"runs":\[\{"text":"([^"]+)"\}', resp.text)
+
+        videos = []
+        for i, vid in enumerate(video_ids[:max_results]):
+            title = titles[i] if i < len(titles) else f"Video {vid}"
+            videos.append({
+                'video_id': vid,
+                'title': title,
+                'date': '',
+                'url': f"https://youtu.be/{vid}",
+                'description': '',
+            })
+        return videos
+    except Exception as e:
+        print(f"Page scrape failed: {e}")
+        return []
+
+
 def fetch_channel_videos(channel_handle: str = "ten_bagger", max_results: int = 5) -> List[Dict]:
     """
-    Get recent video IDs from a YouTube channel via RSS feed.
-    Uses hardcoded channel ID (reliable) with page-scrape fallback.
+    Get recent video IDs from a YouTube channel.
+    Tries RSS feed first, falls back to direct page scrape.
     """
     if not HAS_WEB:
         return []
 
-    channel_id = YOUTUBE_CHANNEL_ID
-
-    # Fallback: scrape channel page if hardcoded ID ever stops working
-    def _scrape_channel_id(handle: str) -> Optional[str]:
-        try:
-            resp = requests.get(
-                f"https://www.youtube.com/@{handle}",
-                headers={"User-Agent": "Mozilla/5.0"},
-                timeout=10
-            )
-            match = re.search(r'"externalId":"(UC[^"]+)"', resp.text)
-            if match:
-                return match.group(1)
-        except Exception:
-            pass
-        return None
-
-    # Fetch RSS feed
-    rss_url = f"https://www.youtube.com/feeds/videos.xml?channel_id={channel_id}"
+    # Try RSS feed first
+    rss_url = f"https://www.youtube.com/feeds/videos.xml?channel_id={YOUTUBE_CHANNEL_ID}"
     try:
         rss_resp = requests.get(rss_url, timeout=10)
 
-        # If RSS returns empty/error, try scraping for a fresh channel ID
-        if rss_resp.status_code != 200 or '<entry>' not in rss_resp.text:
-            print(f"RSS feed failed (status {rss_resp.status_code}), trying page scrape...")
-            scraped_id = _scrape_channel_id(channel_handle)
-            if scraped_id:
-                channel_id = scraped_id
-                rss_url = f"https://www.youtube.com/feeds/videos.xml?channel_id={channel_id}"
-                rss_resp = requests.get(rss_url, timeout=10)
-            else:
-                print(f"Could not resolve channel ID for @{channel_handle}")
-                return []
+        if rss_resp.status_code == 200 and '<entry>' in rss_resp.text:
+            soup = BeautifulSoup(rss_resp.text, 'xml')
+            videos = []
+            for entry in soup.find_all('entry')[:max_results]:
+                video_id_tag = entry.find('yt:videoId')
+                title_tag = entry.find('title')
+                published_tag = entry.find('published')
+                desc_tag = entry.find('media:description')
 
-        soup = BeautifulSoup(rss_resp.text, 'xml')
+                if not video_id_tag or not title_tag:
+                    continue
 
-        videos = []
-        for entry in soup.find_all('entry')[:max_results]:
-            video_id_tag = entry.find('yt:videoId')
-            title_tag = entry.find('title')
-            published_tag = entry.find('published')
-            desc_tag = entry.find('media:description')
+                videos.append({
+                    'video_id': video_id_tag.text,
+                    'title': title_tag.text,
+                    'date': published_tag.text[:10] if published_tag else '',
+                    'url': f"https://youtu.be/{video_id_tag.text}",
+                    'description': desc_tag.text if desc_tag else '',
+                })
 
-            if not video_id_tag or not title_tag:
-                continue
+            if videos:
+                return videos
+    except Exception:
+        pass
 
-            video_id = video_id_tag.text
-            title = title_tag.text
-            published = published_tag.text[:10] if published_tag else ''
-            description = desc_tag.text if desc_tag else ''
-
-            videos.append({
-                'video_id': video_id,
-                'title': title,
-                'date': published,
-                'url': f"https://youtu.be/{video_id}",
-                'description': description,
-            })
-
-        return videos
-
-    except Exception as e:
-        print(f"Failed to fetch channel videos: {e}")
-        return []
+    # Fallback: scrape channel page directly
+    print("RSS feed unavailable, scraping channel page...")
+    return _scrape_videos_from_page(channel_handle, max_results)
 
 
 def parse_transcript_analysis(transcript: str, video_title: str = "", video_date: str = "") -> Dict:
@@ -491,6 +490,16 @@ def run_full_scrape(save_to_db: bool = True) -> Dict:
             analysis = parse_transcript_analysis(text_to_parse, video['title'], video['date'])
             analysis['url'] = video['url']
             analysis['raw_content'] = text_to_parse[:5000]
+
+            # Generate AI executive summary from transcript
+            if transcript:
+                from .ai_summary import generate_executive_summary
+                print(f"    Generating AI executive summary...")
+                exec_summary = generate_executive_summary(transcript, video['title'])
+                if exec_summary:
+                    analysis['executive_summary'] = exec_summary
+                    print(f"    AI summary generated ({len(exec_summary)} chars)")
+
             results['youtube_videos'].append(analysis)
             print(f"    Regime: {analysis['regime']} (from {source_note})")
             print(f"    Tickers: {', '.join(analysis['tickers_mentioned'])}")

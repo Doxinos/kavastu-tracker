@@ -158,6 +158,12 @@ class PortfolioDB:
             )
         """)
 
+        # Add executive_summary to market_analysis if not present
+        try:
+            cursor.execute("SELECT executive_summary FROM market_analysis LIMIT 1")
+        except sqlite3.OperationalError:
+            cursor.execute("ALTER TABLE market_analysis ADD COLUMN executive_summary TEXT")
+
         # Add profile_id to trade_history if not present
         try:
             cursor.execute("SELECT profile_id FROM trade_history LIMIT 1")
@@ -518,8 +524,9 @@ class PortfolioDB:
         cursor.execute("""
             INSERT INTO market_analysis
             (date, source, source_type, title, url, regime, summary,
-             tickers_mentioned, buy_signals, sell_signals, targets, raw_content)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+             tickers_mentioned, buy_signals, sell_signals, targets, raw_content,
+             executive_summary)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (
             analysis.get('date', datetime.now().strftime('%Y-%m-%d')),
             analysis.get('source', ''),
@@ -532,7 +539,8 @@ class PortfolioDB:
             json.dumps(analysis.get('buy_signals', []), ensure_ascii=False),
             json.dumps(analysis.get('sell_signals', []), ensure_ascii=False),
             json.dumps(analysis.get('targets', {}), ensure_ascii=False),
-            analysis.get('raw_content', '')
+            analysis.get('raw_content', ''),
+            analysis.get('executive_summary', '')
         ))
         self.conn.commit()
         return cursor.lastrowid
