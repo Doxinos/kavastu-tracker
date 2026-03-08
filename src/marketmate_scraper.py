@@ -531,9 +531,20 @@ def run_full_scrape(save_to_db: bool = True) -> Dict:
                 # Check if we already have this URL
                 cursor = db.conn.cursor()
                 if analysis.get('url'):
-                    cursor.execute("SELECT id FROM market_analysis WHERE url = ?", (analysis['url'],))
-                    if cursor.fetchone():
-                        print(f"  Skip (exists): {analysis['title']}")
+                    cursor.execute("SELECT id, executive_summary FROM market_analysis WHERE url = ?", (analysis['url'],))
+                    existing = cursor.fetchone()
+                    if existing:
+                        # Update executive_summary if we have a new one and existing is empty
+                        if analysis.get('executive_summary') and not existing[1]:
+                            cursor.execute(
+                                "UPDATE market_analysis SET executive_summary = ? WHERE id = ?",
+                                (analysis['executive_summary'], existing[0])
+                            )
+                            db.conn.commit()
+                            results['total_saved'] += 1
+                            print(f"  Updated summary: {analysis['title']} (ID: {existing[0]})")
+                        else:
+                            print(f"  Skip (exists): {analysis['title']}")
                         continue
 
                 aid = db.save_market_analysis(analysis)
