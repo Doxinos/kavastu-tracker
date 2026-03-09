@@ -7,6 +7,7 @@ Designed to be consumed by the Next.js dashboard frontend.
 Run with:
     uvicorn api.main:app --reload --port 8000
 """
+import os
 import sys
 from pathlib import Path
 from datetime import datetime
@@ -573,11 +574,20 @@ def trigger_scrape():
     try:
         from src.marketmate_scraper import run_full_scrape
         results = run_full_scrape(save_to_db=True)
+        yt_details = []
+        for v in results['youtube_videos']:
+            yt_details.append({
+                'title': v.get('title', ''),
+                'has_transcript': bool(v.get('raw_content')),
+                'has_summary': bool(v.get('executive_summary')),
+            })
         return {
             'status': 'ok',
             'youtube_videos': len(results['youtube_videos']),
+            'youtube_details': yt_details,
             'website_analyses': len(results['website_analyses']),
             'total_saved': results['total_saved'],
+            'anthropic_key_set': bool(os.environ.get('ANTHROPIC_API_KEY')),
         }
     except Exception as e:
         return {'status': 'error', 'message': str(e)}
