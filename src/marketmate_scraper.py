@@ -487,18 +487,38 @@ def run_full_scrape(save_to_db: bool = True) -> Dict:
             print(f"    Using RSS description as fallback")
 
         if text_to_parse:
-            analysis = parse_transcript_analysis(text_to_parse, video['title'], video['date'])
-            analysis['url'] = video['url']
-            analysis['raw_content'] = text_to_parse[:5000]
+            analysis = None
 
-            # Generate AI executive summary from transcript
+            # Try AI-powered full analysis first (regime + summary + signals in one call)
             if transcript:
-                from .ai_summary import generate_executive_summary
-                print(f"    Generating AI executive summary...")
-                exec_summary = generate_executive_summary(transcript, video['title'])
-                if exec_summary:
-                    analysis['executive_summary'] = exec_summary
-                    print(f"    AI summary generated ({len(exec_summary)} chars)")
+                from .ai_summary import generate_full_analysis
+                print(f"    Generating AI full analysis...")
+                ai_result = generate_full_analysis(transcript, video['title'])
+                if ai_result:
+                    analysis = {
+                        'date': video['date'] or datetime.now().strftime('%Y-%m-%d'),
+                        'source': 'MarketMate',
+                        'source_type': 'youtube',
+                        'title': video['title'],
+                        'url': video['url'],
+                        'raw_content': text_to_parse[:5000],
+                        'regime': ai_result['regime'],
+                        'summary': ai_result['summary'],
+                        'executive_summary': ai_result['executive_summary'],
+                        'tickers_mentioned': ai_result['tickers_mentioned'],
+                        'buy_signals': ai_result['buy_signals'],
+                        'sell_signals': ai_result['sell_signals'],
+                        'targets': ai_result['targets'],
+                    }
+                    source_note = "AI analysis"
+                    print(f"    AI analysis complete ({len(ai_result.get('executive_summary', ''))} chars)")
+
+            # Fallback to keyword parsing if AI analysis failed
+            if not analysis:
+                print(f"    Falling back to keyword analysis...")
+                analysis = parse_transcript_analysis(text_to_parse, video['title'], video['date'])
+                analysis['url'] = video['url']
+                analysis['raw_content'] = text_to_parse[:5000]
 
             results['youtube_videos'].append(analysis)
             print(f"    Regime: {analysis['regime']} (from {source_note})")
@@ -534,15 +554,29 @@ def run_full_scrape(save_to_db: bool = True) -> Dict:
                     cursor.execute("SELECT id, executive_summary FROM market_analysis WHERE url = ?", (analysis['url'],))
                     existing = cursor.fetchone()
                     if existing:
-                        # Update executive_summary if we have a new one and existing is empty
+                        # Update AI-generated fields if we have new data and existing is empty
                         if analysis.get('executive_summary') and not existing[1]:
+                            import json as _json
                             cursor.execute(
-                                "UPDATE market_analysis SET executive_summary = ? WHERE id = ?",
-                                (analysis['executive_summary'], existing[0])
+                                """UPDATE market_analysis
+                                   SET executive_summary = ?, regime = ?, summary = ?,
+                                       tickers_mentioned = ?, buy_signals = ?, sell_signals = ?,
+                                       targets = ?
+                                   WHERE id = ?""",
+                                (
+                                    analysis['executive_summary'],
+                                    analysis.get('regime', ''),
+                                    analysis.get('summary', ''),
+                                    _json.dumps(analysis.get('tickers_mentioned', []), ensure_ascii=False),
+                                    _json.dumps(analysis.get('buy_signals', []), ensure_ascii=False),
+                                    _json.dumps(analysis.get('sell_signals', []), ensure_ascii=False),
+                                    _json.dumps(analysis.get('targets', {}), ensure_ascii=False),
+                                    existing[0],
+                                )
                             )
                             db.conn.commit()
                             results['total_saved'] += 1
-                            print(f"  Updated summary: {analysis['title']} (ID: {existing[0]})")
+                            print(f"  Updated: {analysis['title']} (ID: {existing[0]})")
                         else:
                             print(f"  Skip (exists): {analysis['title']}")
                         continue
