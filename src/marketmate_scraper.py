@@ -551,18 +551,18 @@ def run_full_scrape(save_to_db: bool = True) -> Dict:
                 # Check if we already have this URL
                 cursor = db.conn.cursor()
                 if analysis.get('url'):
-                    cursor.execute("SELECT id, executive_summary FROM market_analysis WHERE url = ?", (analysis['url'],))
+                    cursor.execute(db._q("SELECT id, executive_summary FROM market_analysis WHERE url = ?"), (analysis['url'],))
                     existing = cursor.fetchone()
                     if existing:
                         # Update AI-generated fields if we have new data and existing is empty
                         if analysis.get('executive_summary') and not existing[1]:
                             import json as _json
                             cursor.execute(
-                                """UPDATE market_analysis
+                                db._q("""UPDATE market_analysis
                                    SET executive_summary = ?, regime = ?, summary = ?,
                                        tickers_mentioned = ?, buy_signals = ?, sell_signals = ?,
                                        targets = ?
-                                   WHERE id = ?""",
+                                   WHERE id = ?"""),
                                 (
                                     analysis['executive_summary'],
                                     analysis.get('regime', ''),
