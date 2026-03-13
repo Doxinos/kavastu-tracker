@@ -29,7 +29,7 @@ class PortfolioDB:
         If DATABASE_URL env var is set and psycopg2 is available, use PostgreSQL.
         Otherwise fall back to SQLite.
         """
-        database_url = os.environ.get('DATABASE_URL')
+        database_url = os.environ.get('DATABASE_URL') or os.environ.get('SUPABASE_DB_URL')
 
         if database_url and HAS_PSYCOPG2:
             self.db_type = 'postgres'
