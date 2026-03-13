@@ -549,7 +549,7 @@ def run_full_scrape(save_to_db: bool = True) -> Dict:
         with PortfolioDB() as db:
             for analysis in results['youtube_videos'] + results['website_analyses']:
                 # Check if we already have this URL
-                cursor = db.conn.cursor()
+                cursor = db._cursor()
                 if analysis.get('url'):
                     cursor.execute(db._q("SELECT id, executive_summary FROM market_analysis WHERE url = ?"), (analysis['url'],))
                     existing = cursor.fetchone()

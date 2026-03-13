@@ -160,7 +160,7 @@ def get_dashboard():
             snapshot = PortfolioSnapshot(**snapshot_row)
 
         # Get latest screener results
-        cursor = db.conn.cursor()
+        cursor = db._cursor()
         cursor.execute("""
             SELECT * FROM screener_results
             WHERE snapshot_id = (SELECT MAX(id) FROM weekly_snapshots)
@@ -224,7 +224,7 @@ def get_screener_results(
         trending: Filter by trending classification (HOT/COLD/NEUTRAL)
     """
     with get_db() as db:
-        cursor = db.conn.cursor()
+        cursor = db._cursor()
 
         query = """
             SELECT * FROM screener_results
@@ -255,7 +255,7 @@ def get_stock_detail(ticker: str):
 
     with get_db() as db:
         # Get latest screener entry
-        cursor = db.conn.cursor()
+        cursor = db._cursor()
         cursor.execute("""
             SELECT * FROM screener_results
             WHERE ticker = ?
@@ -326,7 +326,7 @@ def get_portfolio_history(days: int = Query(365, ge=7, le=1825)):
 def get_trending_analysis():
     """Get trending stock analysis - HOT/COLD/NEUTRAL breakdown."""
     with get_db() as db:
-        cursor = db.conn.cursor()
+        cursor = db._cursor()
         cursor.execute("""
             SELECT * FROM screener_results
             WHERE snapshot_id = (SELECT MAX(id) FROM weekly_snapshots)
@@ -382,7 +382,7 @@ def get_recommendations():
     BUY criteria: Score >= 100 AND Trending >= 70 (HOT)
     """
     with get_db() as db:
-        cursor = db.conn.cursor()
+        cursor = db._cursor()
         cursor.execute("""
             SELECT * FROM screener_results
             WHERE snapshot_id = (SELECT MAX(id) FROM weekly_snapshots)
@@ -671,7 +671,7 @@ def get_portfolio(profile_id: int = 1):
         cash = db.get_portfolio_cash(profile_id=profile_id)
 
         # Enrich positions with latest screener prices if available
-        cursor = db.conn.cursor()
+        cursor = db._cursor()
         enriched = []
         total_market_value = 0
 
@@ -823,7 +823,7 @@ def get_market_health():
     0 = extreme bear, 50 = neutral, 100 = extreme bull.
     """
     with get_db() as db:
-        cursor = db.conn.cursor()
+        cursor = db._cursor()
         cursor.execute("""
             SELECT trending_classification, score, trending_score
             FROM screener_results

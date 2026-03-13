@@ -320,8 +320,11 @@ def run_weekly_automation(portfolio_value: float = 100000, cash: float = 10000):
         print(f"✅ Saved {len(top_stocks)} stocks to database")
 
         # Get database stats
-        db_size = db.db_path.stat().st_size / 1024
-        print(f"   Database size: {db_size:.1f} KB")
+        if db.db_path:
+            db_size = db.db_path.stat().st_size / 1024
+            print(f"   Database size: {db_size:.1f} KB")
+        else:
+            print(f"   Database: PostgreSQL (Supabase)")
 
     # 3. Generate trade recommendations
     print("\n🎯 Step 3/5: Generating trade recommendations...")
