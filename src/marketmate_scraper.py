@@ -317,9 +317,13 @@ def fetch_website_analyses(max_articles: int = 10) -> List[Dict]:
                     continue
                 if href in seen_urls:
                     continue
-                # Filter for analysis articles (köper, säljer, short, etc.)
+                # Filter for analysis/trading articles
                 title_text = link.get_text(strip=True).lower()
-                if any(kw in title_text for kw in ['köper', 'säljer', 'short', 'bull', 'bear', 'analys']):
+                if any(kw in title_text for kw in [
+                    'köper', 'säljer', 'short', 'lång', 'bull', 'bear', 'analys',
+                    'rally', 'rekyl', 'botten', 'topp', 'warrant', 'börs',
+                    'aktie', 'index', 'dax', 'omx', 's&p',
+                ]):
                     seen_urls.add(href)
                     if len(analyses) < max_articles:
                         article = _fetch_article(href)
