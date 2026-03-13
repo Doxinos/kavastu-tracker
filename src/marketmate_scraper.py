@@ -555,7 +555,7 @@ def run_full_scrape(save_to_db: bool = True) -> Dict:
                     existing = cursor.fetchone()
                     if existing:
                         # Update AI-generated fields if we have new data and existing is empty
-                        if analysis.get('executive_summary') and not existing[1]:
+                        if analysis.get('executive_summary') and not existing['executive_summary']:
                             import json as _json
                             cursor.execute(
                                 db._q("""UPDATE market_analysis
@@ -571,12 +571,12 @@ def run_full_scrape(save_to_db: bool = True) -> Dict:
                                     _json.dumps(analysis.get('buy_signals', []), ensure_ascii=False),
                                     _json.dumps(analysis.get('sell_signals', []), ensure_ascii=False),
                                     _json.dumps(analysis.get('targets', {}), ensure_ascii=False),
-                                    existing[0],
+                                    existing['id'],
                                 )
                             )
                             db.conn.commit()
                             results['total_saved'] += 1
-                            print(f"  Updated: {analysis['title']} (ID: {existing[0]})")
+                            print(f"  Updated: {analysis['title']} (ID: {existing['id']})")
                         else:
                             print(f"  Skip (exists): {analysis['title']}")
                         continue
