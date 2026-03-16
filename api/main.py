@@ -13,7 +13,7 @@ from pathlib import Path
 from datetime import datetime
 from typing import Optional, List
 
-from fastapi import FastAPI, Query, BackgroundTasks
+from fastapi import FastAPI, Query, BackgroundTasks, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
@@ -240,7 +240,7 @@ def get_screener_results(
         query += " ORDER BY rank ASC LIMIT ?"
         params.append(limit)
 
-        cursor.execute(query, params)
+        cursor.execute(db._q(query), params)
         rows = [dict(r) for r in cursor.fetchall()]
 
         return [row_to_screener_stock(r) for r in rows]
@@ -256,32 +256,32 @@ def get_stock_detail(ticker: str):
     with get_db() as db:
         # Get latest screener entry
         cursor = db._cursor()
-        cursor.execute("""
+        cursor.execute(db._q("""
             SELECT * FROM screener_results
             WHERE ticker = ?
             ORDER BY date DESC LIMIT 1
-        """, (ticker,))
+        """), (ticker,))
         latest = cursor.fetchone()
 
         if not latest:
-            return {"error": f"Stock {ticker} not found in screener results"}
+            raise HTTPException(status_code=404, detail=f"Stock {ticker} not found in screener results")
 
         # Get historical scores (last 12 weeks)
-        cursor.execute("""
+        cursor.execute(db._q("""
             SELECT date, score, trending_score, trending_classification, rank, price
             FROM screener_results
             WHERE ticker = ?
             ORDER BY date DESC LIMIT 12
-        """, (ticker,))
+        """), (ticker,))
         history = [dict(r) for r in cursor.fetchall()]
 
         # Get trade history for this stock
-        cursor.execute("""
+        cursor.execute(db._q("""
             SELECT date, action, shares, price, amount, reason
             FROM trade_history
             WHERE ticker = ?
             ORDER BY date DESC LIMIT 20
-        """, (ticker,))
+        """), (ticker,))
         trades = [dict(r) for r in cursor.fetchall()]
 
         latest_dict = dict(latest)
@@ -679,12 +679,12 @@ def get_portfolio(profile_id: int = 1):
             ticker = pos['ticker']
 
             # Get latest price from screener
-            cursor.execute("""
+            cursor.execute(db._q("""
                 SELECT price, score, trending_score, trending_classification
                 FROM screener_results
                 WHERE ticker = ?
                 ORDER BY date DESC LIMIT 1
-            """, (ticker,))
+            """), (ticker,))
             screener = cursor.fetchone()
 
             current_price = dict(screener)['price'] if screener else pos['avg_cost']
