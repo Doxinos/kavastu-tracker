@@ -311,10 +311,32 @@ def run_weekly_automation(portfolio_value: float = 100000, cash: float = 10000):
         missing_watchlist = watchlist_tickers - top_tickers
 
         if missing_watchlist:
+            # First check if any are in screener_results (scored > 0 but outside top 50)
             watchlist_extras = screener_results[screener_results['ticker'].isin(missing_watchlist)]
             if not watchlist_extras.empty:
                 top_stocks = pd.concat([top_stocks, watchlist_extras], ignore_index=True)
-                print(f"   Added {len(watchlist_extras)} watchlist stocks outside top 50")
+                found = set(watchlist_extras['ticker'].tolist())
+                missing_watchlist -= found
+                print(f"   Added {len(watchlist_extras)} watchlist stocks from screener results")
+
+            # Force-screen remaining watchlist stocks (e.g. below MA200, score=0)
+            if missing_watchlist:
+                print(f"   Force-screening {len(missing_watchlist)} watchlist stocks not in results...")
+                watchlist_forced = run_screener(list(missing_watchlist))
+                if not watchlist_forced.empty:
+                    top_stocks = pd.concat([top_stocks, watchlist_forced], ignore_index=True)
+                    print(f"   Added {len(watchlist_forced)} watchlist stocks (force-screened)")
+                else:
+                    # Still missing — add placeholder rows so they appear with score 0
+                    for wt in missing_watchlist:
+                        placeholder = {col: 0 for col in top_stocks.columns}
+                        placeholder['ticker'] = wt
+                        placeholder['name'] = wt.replace('.ST', '').replace('.OL', '')
+                        placeholder['score'] = 0
+                        placeholder['trending_score'] = 0
+                        placeholder['trending_classification'] = 'NEUTRAL'
+                        top_stocks = pd.concat([top_stocks, pd.DataFrame([placeholder])], ignore_index=True)
+                    print(f"   Added {len(missing_watchlist)} watchlist stocks as placeholders (no data)")
 
         db.save_screener_results(snapshot_id, today, top_stocks)
         print(f"✅ Saved {len(top_stocks)} stocks to database")
