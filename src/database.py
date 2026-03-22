@@ -113,7 +113,22 @@ class PortfolioDB:
         else:
             self._init_tables_sqlite(cursor)
 
+        # Migrations: add columns to existing tables
+        self._run_migrations(cursor)
+
         self.conn.commit()
+
+    def _run_migrations(self, cursor):
+        """Add columns that may be missing from older table schemas."""
+        if self.db_type == 'postgres':
+            cursor.execute("""
+                ALTER TABLE screener_results ADD COLUMN IF NOT EXISTS name TEXT
+            """)
+        else:
+            try:
+                cursor.execute("ALTER TABLE screener_results ADD COLUMN name TEXT")
+            except Exception:
+                pass  # Column already exists
 
     def _init_tables_sqlite(self, cursor):
         """Create SQLite tables."""
@@ -141,6 +156,7 @@ class PortfolioDB:
                 snapshot_id INTEGER NOT NULL,
                 date TEXT NOT NULL,
                 ticker TEXT NOT NULL,
+                name TEXT,
                 rank INTEGER,
                 score REAL NOT NULL,
                 trending_score REAL,
@@ -292,6 +308,7 @@ class PortfolioDB:
                 snapshot_id INTEGER NOT NULL REFERENCES weekly_snapshots(id),
                 date TEXT NOT NULL,
                 ticker TEXT NOT NULL,
+                name TEXT,
                 rank INTEGER,
                 score REAL NOT NULL,
                 trending_score REAL,
@@ -464,12 +481,12 @@ class PortfolioDB:
         for idx, row in stocks.iterrows():
             cursor.execute(f"""
                 INSERT INTO screener_results
-                (snapshot_id, date, ticker, rank, score, trending_score,
+                (snapshot_id, date, ticker, name, rank, score, trending_score,
                  trending_classification, price, ma50, ma200, ma200_trend,
                  rs_rating, momentum_3m, momentum_6m, quality_score, news_headline)
-                VALUES ({p}, {p}, {p}, {p}, {p}, {p}, {p}, {p}, {p}, {p}, {p}, {p}, {p}, {p}, {p}, {p})
+                VALUES ({p}, {p}, {p}, {p}, {p}, {p}, {p}, {p}, {p}, {p}, {p}, {p}, {p}, {p}, {p}, {p}, {p})
             """, (
-                snapshot_id, date, row.get('ticker'), idx + 1,
+                snapshot_id, date, row.get('ticker'), row.get('name', ''), idx + 1,
                 row.get('score', 0), row.get('trending_score', 0),
                 row.get('trending_classification', 'NEUTRAL'),
                 row.get('price', 0), row.get('ma50', 0), row.get('ma200', 0),

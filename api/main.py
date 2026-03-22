@@ -64,6 +64,7 @@ class PortfolioSnapshot(BaseModel):
 
 class ScreenerStock(BaseModel):
     ticker: str
+    name: Optional[str] = ""
     rank: int
     score: float
     trending_score: float
@@ -118,6 +119,7 @@ def row_to_screener_stock(row) -> ScreenerStock:
     """Convert a database row to ScreenerStock model."""
     return ScreenerStock(
         ticker=row['ticker'],
+        name=row.get('name', ''),
         rank=row.get('rank', 0),
         score=row['score'],
         trending_score=row.get('trending_score', 0),
