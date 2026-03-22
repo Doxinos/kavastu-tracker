@@ -310,27 +310,18 @@ def fetch_website_analyses(max_articles: int = 10) -> List[Dict]:
             )
             soup = BeautifulSoup(resp.text, 'html.parser')
 
-            # Find article links — include all article-style URLs, exclude nav/category pages
-            _skip_patterns = {
-                '/category/', '/tag/', '/page/', '/author/', '/wp-content/',
-                '/kontakt/', '/om-oss/', '/integritetspolicy/',
-            }
-            for link in soup.find_all('a', href=True):
+            # Find article links via heading tags (h2-h6) which contain post titles
+            for heading in soup.find_all(['h2', 'h3', 'h4', 'h5', 'h6']):
+                link = heading.find('a', href=True) or heading.find_parent('a', href=True)
+                if not link:
+                    continue
                 href = link['href']
                 if not href.startswith(WEBSITE_BASE):
                     continue
-                if href in seen_urls:
+                if href in seen_urls or href.rstrip('/') == listing_url.rstrip('/'):
                     continue
-                # Skip navigation, category, and non-article pages
-                path = href.replace(WEBSITE_BASE, '')
-                if any(skip in path for skip in _skip_patterns):
-                    continue
-                # Must be a slug-style article URL (e.g. /borsrally-vantar/)
-                # Skip bare domain, bare /borsanalyser/, etc.
-                if path.strip('/').count('/') > 0 or len(path.strip('/')) < 5:
-                    continue
-                title_text = link.get_text(strip=True)
-                if not title_text or len(title_text) < 5:
+                title_text = heading.get_text(strip=True)
+                if not title_text or len(title_text) < 3:
                     continue
                 seen_urls.add(href)
                 if len(analyses) < max_articles:
