@@ -310,25 +310,33 @@ def fetch_website_analyses(max_articles: int = 10) -> List[Dict]:
             )
             soup = BeautifulSoup(resp.text, 'html.parser')
 
-            # Find article links
+            # Find article links — include all article-style URLs, exclude nav/category pages
+            _skip_patterns = {
+                '/category/', '/tag/', '/page/', '/author/', '/wp-content/',
+                '/kontakt/', '/om-oss/', '/integritetspolicy/',
+            }
             for link in soup.find_all('a', href=True):
                 href = link['href']
                 if not href.startswith(WEBSITE_BASE):
                     continue
                 if href in seen_urls:
                     continue
-                # Filter for analysis/trading articles
-                title_text = link.get_text(strip=True).lower()
-                if any(kw in title_text for kw in [
-                    'köper', 'säljer', 'short', 'lång', 'bull', 'bear', 'analys',
-                    'rally', 'rekyl', 'botten', 'topp', 'warrant', 'börs',
-                    'aktie', 'index', 'dax', 'omx', 's&p',
-                ]):
-                    seen_urls.add(href)
-                    if len(analyses) < max_articles:
-                        article = _fetch_article(href)
-                        if article:
-                            analyses.append(article)
+                # Skip navigation, category, and non-article pages
+                path = href.replace(WEBSITE_BASE, '')
+                if any(skip in path for skip in _skip_patterns):
+                    continue
+                # Must be a slug-style article URL (e.g. /borsrally-vantar/)
+                # Skip bare domain, bare /borsanalyser/, etc.
+                if path.strip('/').count('/') > 0 or len(path.strip('/')) < 5:
+                    continue
+                title_text = link.get_text(strip=True)
+                if not title_text or len(title_text) < 5:
+                    continue
+                seen_urls.add(href)
+                if len(analyses) < max_articles:
+                    article = _fetch_article(href)
+                    if article:
+                        analyses.append(article)
 
         except Exception as e:
             print(f"Failed to fetch {listing_url}: {e}")
