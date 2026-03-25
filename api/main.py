@@ -1026,6 +1026,32 @@ def screener_status(secret: str = ""):
     return _screener_status
 
 
+@app.post("/api/admin/dedup-screener")
+def dedup_screener(secret: str = ""):
+    """Remove duplicate screener rows, keeping only one per (snapshot_id, ticker)."""
+    if secret != "kavastu2026sync":
+        return {"status": "error", "message": "Invalid secret"}
+    with get_db() as db:
+        cursor = db._cursor()
+        if db.db_type == 'postgres':
+            cursor.execute("""
+                DELETE FROM screener_results
+                WHERE id NOT IN (
+                    SELECT MIN(id) FROM screener_results GROUP BY snapshot_id, ticker
+                )
+            """)
+        else:
+            cursor.execute("""
+                DELETE FROM screener_results
+                WHERE rowid NOT IN (
+                    SELECT MIN(rowid) FROM screener_results GROUP BY snapshot_id, ticker
+                )
+            """)
+        deleted = cursor.rowcount
+        db.conn.commit()
+        return {"status": "ok", "deleted": deleted}
+
+
 # --- Admin: Daily price refresh (lightweight) ---
 
 _price_status = {"running": False, "last_run": None, "last_result": None}
