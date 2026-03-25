@@ -23,7 +23,7 @@ import argparse
 sys.path.append(str(Path(__file__).parent.parent))
 
 from src.database import PortfolioDB
-from src.stock_universe import get_all_swedish_stocks
+from src.stock_universe import get_all_swedish_stocks, get_stock_info
 from src.screener import calculate_stock_score
 from src.data_fetcher import fetch_stock_data
 from src.ma_calculator import calculate_ma50_ma200, calculate_atr
@@ -33,7 +33,7 @@ from src.marketmate_scraper import run_full_scrape
 import time
 
 
-def run_screener(stocks: list) -> pd.DataFrame:
+def run_screener(stocks: list, ticker_names: dict = None) -> pd.DataFrame:
     """
     Run the Kavastu screener on all stocks.
     Returns DataFrame with screener results + trending analysis sorted by score.
@@ -104,7 +104,7 @@ def run_screener(stocks: list) -> pd.DataFrame:
 
                 results.append({
                     'ticker': ticker,
-                    'name': ticker.replace('.ST', ''),
+                    'name': (ticker_names or {}).get(ticker, ticker.replace('.ST', '').replace('.OL', '')),
                     'score': metrics.get('score', 0),
                     'price': price,
                     'signal': metrics.get('signal', 'HOLD'),
@@ -264,7 +264,10 @@ def run_weekly_automation(portfolio_value: float = 100000, cash: float = 10000):
     # 1. Run screener
     print("\n📊 Step 1/5: Running screener...")
     stocks = get_all_swedish_stocks()
-    screener_results = run_screener(stocks)
+    # Build ticker → company name mapping from CSV
+    stock_info = get_stock_info()
+    ticker_names = dict(zip(stock_info['Ticker'], stock_info['Name']))
+    screener_results = run_screener(stocks, ticker_names)
 
     if screener_results.empty:
         print("❌ Screener returned no results - aborting")
@@ -322,7 +325,7 @@ def run_weekly_automation(portfolio_value: float = 100000, cash: float = 10000):
             # Force-screen remaining watchlist stocks (e.g. below MA200, score=0)
             if missing_watchlist:
                 print(f"   Force-screening {len(missing_watchlist)} watchlist stocks not in results...")
-                watchlist_forced = run_screener(list(missing_watchlist))
+                watchlist_forced = run_screener(list(missing_watchlist), ticker_names)
                 if not watchlist_forced.empty:
                     top_stocks = pd.concat([top_stocks, watchlist_forced], ignore_index=True)
                     print(f"   Added {len(watchlist_forced)} watchlist stocks (force-screened)")
@@ -331,7 +334,7 @@ def run_weekly_automation(portfolio_value: float = 100000, cash: float = 10000):
                     for wt in missing_watchlist:
                         placeholder = {col: 0 for col in top_stocks.columns}
                         placeholder['ticker'] = wt
-                        placeholder['name'] = wt.replace('.ST', '').replace('.OL', '')
+                        placeholder['name'] = ticker_names.get(wt, wt.replace('.ST', '').replace('.OL', ''))
                         placeholder['score'] = 0
                         placeholder['trending_score'] = 0
                         placeholder['trending_classification'] = 'NEUTRAL'
