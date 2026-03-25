@@ -478,6 +478,9 @@ class PortfolioDB:
         cursor = self.conn.cursor()
         p = '%s' if self.db_type == 'postgres' else '?'
 
+        # Clear any previous results for this snapshot to prevent duplicates
+        cursor.execute(f"DELETE FROM screener_results WHERE snapshot_id = {p}", (snapshot_id,))
+
         for idx, row in stocks.iterrows():
             cursor.execute(f"""
                 INSERT INTO screener_results
