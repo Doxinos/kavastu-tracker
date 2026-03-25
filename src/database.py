@@ -118,17 +118,26 @@ class PortfolioDB:
 
         self.conn.commit()
 
+    _migrations_done = False
+
     def _run_migrations(self, cursor):
         """Add columns that may be missing from older table schemas."""
-        if self.db_type == 'postgres':
-            cursor.execute("""
-                ALTER TABLE screener_results ADD COLUMN IF NOT EXISTS name TEXT
-            """)
-        else:
-            try:
-                cursor.execute("ALTER TABLE screener_results ADD COLUMN name TEXT")
-            except Exception:
-                pass  # Column already exists
+        if PortfolioDB._migrations_done:
+            return
+        try:
+            if self.db_type == 'postgres':
+                cursor.execute("""
+                    ALTER TABLE screener_results ADD COLUMN IF NOT EXISTS name TEXT
+                """)
+            else:
+                try:
+                    cursor.execute("ALTER TABLE screener_results ADD COLUMN name TEXT")
+                except Exception:
+                    pass  # Column already exists
+            PortfolioDB._migrations_done = True
+        except Exception:
+            # Deadlock or other transient error — skip, column likely exists
+            PortfolioDB._migrations_done = True
 
     def _init_tables_sqlite(self, cursor):
         """Create SQLite tables."""
