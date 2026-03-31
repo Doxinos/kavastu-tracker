@@ -42,7 +42,7 @@ Regler:
 - Om transkriptet är otydligt, notera det"""
 
 
-FULL_ANALYSIS_SYSTEM_PROMPT = """Du är en erfaren finansanalytiker. Analysera detta YouTube-transkript om börsen och returnera ett JSON-objekt med följande struktur:
+FULL_ANALYSIS_SYSTEM_PROMPT = """Du är en erfaren finansanalytiker. Analysera denna text om börsen (kan vara ett YouTube-transkript eller en webbsideartikel) och returnera ett JSON-objekt med följande struktur:
 
 {
   "regime": "ETT AV: BULL, BULL_WITH_SHORT_TERM_PULLBACK, NEUTRAL, BEAR",
@@ -142,9 +142,9 @@ def generate_executive_summary(transcript: str, video_title: str = "") -> Option
         return None
 
 
-def generate_full_analysis(transcript: str, video_title: str = "") -> Optional[Dict]:
+def generate_full_analysis(text: str, title: str = "") -> Optional[Dict]:
     """
-    Generate a complete AI analysis from a MarketMate transcript.
+    Generate a complete AI analysis from a MarketMate text (transcript or article).
 
     Returns dict with: regime, summary, tickers_mentioned, buy_signals,
     sell_signals, targets, executive_summary — or None if unavailable.
@@ -153,8 +153,8 @@ def generate_full_analysis(transcript: str, video_title: str = "") -> Optional[D
     if not client:
         return None
 
-    transcript = _truncate_transcript(transcript)
-    user_message = f"Video: {video_title}\n\nTranskript:\n{transcript}"
+    text = _truncate_transcript(text)
+    user_message = f"Titel: {title}\n\nText:\n{text}"
 
     try:
         response = client.messages.create(

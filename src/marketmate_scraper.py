@@ -537,6 +537,27 @@ def run_full_scrape(save_to_db: bool = True) -> Dict:
 
     for article in articles:
         print(f"  {article['title']} ({article['date']})")
+
+        # Run AI analysis on article content (same as YouTube)
+        raw_content = article.get('raw_content', '')
+        if raw_content and len(raw_content) > 100:
+            from .ai_summary import generate_full_analysis
+            print(f"    Generating AI analysis...")
+            ai_result = generate_full_analysis(raw_content, article['title'])
+            if ai_result:
+                article['executive_summary'] = ai_result['executive_summary']
+                article['regime'] = ai_result['regime']
+                article['summary'] = ai_result['summary']
+                if ai_result['tickers_mentioned']:
+                    article['tickers_mentioned'] = ai_result['tickers_mentioned']
+                if ai_result['buy_signals']:
+                    article['buy_signals'] = ai_result['buy_signals']
+                if ai_result['sell_signals']:
+                    article['sell_signals'] = ai_result['sell_signals']
+                if ai_result['targets']:
+                    article['targets'] = ai_result['targets']
+                print(f"    AI: {ai_result['regime']} | {ai_result['summary'][:80]}")
+
         if article['buy_signals']:
             for sig in article['buy_signals']:
                 print(f"    BUY {sig['ticker']} | SL: {sig.get('stoploss')} | Target: {sig.get('target')}")
