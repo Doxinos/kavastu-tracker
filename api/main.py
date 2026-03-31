@@ -570,29 +570,43 @@ def get_market_regime():
         return {'regime': 'UNKNOWN', 'date': None, 'summary': 'No analysis data yet'}
 
 
-@app.post("/api/market-analysis/scrape")
-def trigger_scrape():
-    """Manually trigger a MarketMate scrape."""
+_scrape_status = {"running": False, "last_run": None, "last_result": None}
+
+def _run_scrape_task():
+    """Background task that runs the full MarketMate scrape with AI analysis."""
+    global _scrape_status
+    _scrape_status["running"] = True
     try:
         from src.marketmate_scraper import run_full_scrape
         results = run_full_scrape(save_to_db=True)
-        yt_details = []
-        for v in results['youtube_videos']:
-            yt_details.append({
-                'title': v.get('title', ''),
-                'has_transcript': bool(v.get('raw_content')),
-                'has_summary': bool(v.get('executive_summary')),
-            })
-        return {
+        _scrape_status["last_run"] = datetime.now().isoformat()
+        _scrape_status["last_result"] = {
             'status': 'ok',
             'youtube_videos': len(results['youtube_videos']),
-            'youtube_details': yt_details,
             'website_analyses': len(results['website_analyses']),
             'total_saved': results['total_saved'],
-            'anthropic_key_set': bool(os.environ.get('ANTHROPIC_API_KEY')),
         }
     except Exception as e:
-        return {'status': 'error', 'message': str(e)}
+        _scrape_status["last_result"] = {'status': 'error', 'message': str(e)}
+    finally:
+        _scrape_status["running"] = False
+
+@app.post("/api/market-analysis/scrape")
+def trigger_scrape(background_tasks: BackgroundTasks):
+    """Manually trigger a MarketMate scrape (runs in background with AI analysis)."""
+    if _scrape_status["running"]:
+        return {"status": "already_running", "message": "Scrape already in progress"}
+    background_tasks.add_task(_run_scrape_task)
+    return {
+        "status": "started",
+        "message": "MarketMate scrape started in background. Check /api/market-analysis/scrape-status for progress.",
+        "last_run": _scrape_status["last_run"],
+    }
+
+@app.get("/api/market-analysis/scrape-status")
+def scrape_status():
+    """Check if the MarketMate scrape is running."""
+    return _scrape_status
 
 
 # --- Portfolio Management Endpoints ---
