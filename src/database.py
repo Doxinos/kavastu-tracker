@@ -129,6 +129,9 @@ class PortfolioDB:
                 cursor.execute("""
                     ALTER TABLE screener_results ADD COLUMN IF NOT EXISTS name TEXT
                 """)
+                cursor.execute("""
+                    ALTER TABLE screener_results ADD COLUMN IF NOT EXISTS sell_signal TEXT
+                """)
             else:
                 try:
                     cursor.execute("ALTER TABLE screener_results ADD COLUMN name TEXT")
@@ -495,8 +498,8 @@ class PortfolioDB:
                 INSERT INTO screener_results
                 (snapshot_id, date, ticker, name, rank, score, trending_score,
                  trending_classification, price, ma50, ma200, ma200_trend,
-                 rs_rating, momentum_3m, momentum_6m, quality_score, news_headline)
-                VALUES ({p}, {p}, {p}, {p}, {p}, {p}, {p}, {p}, {p}, {p}, {p}, {p}, {p}, {p}, {p}, {p}, {p})
+                 rs_rating, momentum_3m, momentum_6m, quality_score, news_headline, sell_signal)
+                VALUES ({p}, {p}, {p}, {p}, {p}, {p}, {p}, {p}, {p}, {p}, {p}, {p}, {p}, {p}, {p}, {p}, {p}, {p})
             """, (
                 snapshot_id, date, row.get('ticker'), row.get('name', ''), idx + 1,
                 row.get('score', 0), row.get('trending_score', 0),
@@ -504,7 +507,8 @@ class PortfolioDB:
                 row.get('price', 0), row.get('ma50', 0), row.get('ma200', 0),
                 row.get('ma200_trend', 'UNKNOWN'), row.get('rs_rating', 0),
                 row.get('momentum_3m', 0), row.get('momentum_6m', 0),
-                row.get('quality_score', 0), row.get('news_headline', '')
+                row.get('quality_score', 0), row.get('news_headline', ''),
+                row.get('sell_signal', '')
             ))
 
         self.conn.commit()

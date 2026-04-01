@@ -1,0 +1,221 @@
+/Users/peter/Projects/kavastu-tracker/venv/lib/python3.9/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+  warnings.warn(
+HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: FNOX.ST"}}}
+$FNOX.ST: possibly delisted; no price data found  (period=1y) (Yahoo error = "No data found, symbol may be delisted")
+$CARY.ST: possibly delisted; no price data found  (period=1y) (Yahoo error = "No data found, symbol may be delisted")
+
+================================================================================
+KAVASTU WEEKLY AUTOMATION
+================================================================================
+Started: 2026-03-22 19:00:04
+
+📊 Step 1/5: Running screener...
+
+================================================================================
+RUNNING SCREENER
+================================================================================
+Scanning 243 Swedish stocks...
+Fetching OMXS30 benchmark...
+Benchmark 4-week return: 0.00%
+  Progress: 10/243 stocks...
+  Progress: 20/243 stocks...
+  Progress: 30/243 stocks...
+  Progress: 40/243 stocks...
+  Progress: 50/243 stocks...
+⚠️  No data for FNOX.ST
+  Progress: 60/243 stocks...
+⚠️  No data for CARY.ST
+  Progress: 70/243 stocks...
+  Progress: 80/243 stocks...
+  Progress: 90/243 stocks...
+  Progress: 100/243 stocks...
+  Progress: 110/243 stocks...
+  Progress: 120/243 stocks...
+  Progress: 130/243 stocks...
+  Progress: 140/243 stocks...
+  Progress: 150/243 stocks...
+  Progress: 160/243 stocks...
+  Progress: 170/243 stocks...
+  Progress: 180/243 stocks...
+  Progress: 190/243 stocks...
+  Progress: 200/243 stocks...
+  Progress: 210/243 stocks...
+  Progress: 220/243 stocks...
+  Progress: 230/243 stocks...
+  Progress: 240/243 stocks...
+
+✅ Screener complete: 241 stocks ranked
+
+Top 10 stocks:
+  ticker  score  trending_score trending_classification
+ DOFG.OL  127.2              52                 NEUTRAL
+    LRCX  126.1              20                    COLD
+  VAR.OL  125.3              87                     HOT
+  FRO.OL  122.2              15                    COLD
+ AKER.OL  121.3              85                     HOT
+    AMAT  120.5              25                    COLD
+ AKSO.OL  119.0              52                 NEUTRAL
+ MPCC.OL  118.5              70                 NEUTRAL
+HAUTO.OL  117.3              75                     HOT
+  YAR.OL  117.2              77                     HOT
+✅ Screened 241 stocks
+
+💾 Step 2/5: Saving to database...
+   Previous value: 100,000 SEK
+   Week return: +0.00%
+✅ Snapshot saved (ID: 11)
+   Added 2 watchlist stocks from screener results
+   Force-screening 4 watchlist stocks not in results...
+
+================================================================================
+RUNNING SCREENER
+================================================================================
+Scanning 4 Swedish stocks...
+Fetching OMXS30 benchmark...
+Benchmark 4-week return: 0.00%
+
+✅ Screener complete: 4 stocks ranked
+
+Top 10 stocks:
+     ticker  score  trending_score trending_classification
+MAERSK-B.CO  100.3              72                 NEUTRAL
+  DANSKE.CO   85.5              25                    COLD
+     ISS.CO   79.8              30                 NEUTRAL
+  TGAMES.CO   74.1               0                    COLD
+   Added 4 watchlist stocks (force-screened)
+✅ Saved 56 stocks to database
+   Database size: 184.0 KB
+
+🎯 Step 3/5: Generating trade recommendations...
+✅ 11 buy signals, 0 sell signals
+
+📝 Step 4/5: Creating weekly summary...
+✅ Summary saved to: /Users/peter/Projects/kavastu-tracker/reports/weekly_summary_2026-03-22.txt
+
+================================================================================
+KAVASTU WEEKLY SUMMARY - 2026-03-22
+================================================================================
+
+📊 PORTFOLIO SNAPSHOT
+   Total Value:         100,000 SEK
+   Cash:                 10,000 SEK
+   Invested:             90,000 SEK
+   Week Return:            0.00%
+   Holdings:                  0 stocks
+
+📈 SCREENER RESULTS
+   Stocks Scanned:          241
+   Top Score:           DOFG.OL (127.2)
+
+   Trending:
+   🔥 HOT:                   16 stocks
+   ❄️  COLD:                 184 stocks
+   ➖ NEUTRAL:                41 stocks
+
+🏆 TOP 10 STOCKS
+    1. DOFG.OL      Score: 127.2  ➖ Trending:  52/100
+    2. LRCX         Score: 126.1  ❄️ Trending:  20/100
+    3. VAR.OL       Score: 125.3  🔥 Trending:  87/100
+    4. FRO.OL       Score: 122.2  ❄️ Trending:  15/100
+    5. AKER.OL      Score: 121.3  🔥 Trending:  85/100
+    6. AMAT         Score: 120.5  ❄️ Trending:  25/100
+    7. AKSO.OL      Score: 119.0  ➖ Trending:  52/100
+    8. MPCC.OL      Score: 118.5  ➖ Trending:  70/100
+    9. HAUTO.OL     Score: 117.3  🔥 Trending:  75/100
+   10. YAR.OL       Score: 117.2  🔥 Trending:  77/100
+
+🔥 TOP 5 HOT TRENDING STOCKS
+   VAR.OL        87/100 - 4-week return +38.4%, outperforming OMXS30 by 38.4%, volume up 48%
+   AKER.OL       85/100 - 4-week return +18.7%, outperforming OMXS30 by 18.7%, volume up 69%
+   HAUTO.OL      75/100 - 4-week return +14.3%, outperforming OMXS30 by 14.3%, volume up 63%
+   YAR.OL        77/100 - 4-week return +10.9%, outperforming OMXS30 by 10.9%, volume up 38%
+   HANZA.ST      85/100 - 4-week return +19.9%, outperforming OMXS30 by 19.9%, volume up 90%
+
+🎯 TRADE RECOMMENDATIONS
+   🟢 BUY SIGNALS: 11
+      VAR.OL: Score 125/130 (Top Tier) • Trending HOT (87/100) • Above MA200
+      AKER.OL: Score 121/130 (Top Tier) • Trending HOT (85/100) • Above MA200
+      MPCC.OL: Score 118/130 (Top Tier) • Trending NEUTRAL (70/100) • Above MA200
+      HAUTO.OL: Score 117/130 (Top Tier) • Trending HOT (75/100) • Above MA200
+      YAR.OL: Score 117/130 (Top Tier) • Trending HOT (77/100) • Above MA200
+      HANZA.ST: Score 116/130 (Top Tier) • Trending HOT (85/100) • Above MA200
+      EQNR.OL: Score 112/130 (Top Tier) • Trending HOT (87/100) • Above MA200
+      TGS.OL: Score 110/130 (Top Tier) • Trending HOT (80/100) • Above MA200
+      AKRBP.OL: Score 109/130 (Top Tier) • Trending HOT (92/100) • Above MA200
+      HTRO.ST: Score 108/130 (Top Tier) • Trending HOT (75/100) • Above MA200
+      RUSTA.ST: Score 103/130 (Top Tier) • Trending HOT (85/100) • Above MA200
+
+   No sell signals this week
+
+💾 DATABASE
+   Snapshot ID:              11
+   Stocks Saved:            241
+
+================================================================================
+
+
+📰 Step 5/5: Scraping MarketMate analyses...
+============================================================
+MARKETMATE SCRAPER
+============================================================
+
+--- YouTube (@ten_bagger) ---
+Found 3 recent videos
+  Processing: Market update 6 mars - Rekylen kom, när har vi botten? (2026-03-06)
+    Generating AI full analysis...
+    AI analysis complete (1347 chars)
+    Regime: BULL_WITH_SHORT_TERM_PULLBACK (from AI analysis)
+    Tickers: MSFT, SAND.ST, BOLIDEN.ST, OMX, SPX
+    Summary: Rekylen har kommit som förväntat efter optionslösen i februari, och vi befinner oss i en period med 
+  Processing: Market update 12 feb - Ökad risk för rekyl! (2026-02-12)
+    Generating AI full analysis...
+    AI analysis complete (1558 chars)
+    Regime: BULL_WITH_SHORT_TERM_PULLBACK (from AI analysis)
+    Tickers: OMX.ST, SAND.ST, VOLV-B.ST, HEXA-B.ST
+    Summary: Marknaden är överköpt på kort sikt med negativa divergenser som tyder på en rekyl de närmaste två ve
+  Processing: Guld & Silver - Ett rop på hjälp! (2026-01-27)
+    Generating AI full analysis...
+    AI analysis complete (1513 chars)
+    Regime: NEUTRAL (from AI analysis)
+    Tickers: ATCO-A.ST, SAND.ST, GETINGE.ST, QQQ, MSFT, SLV, GDX
+    Summary: Marknadens makro-bild är turbulent med Fed-möte imorgon, svag dollarpositioning och extrem överhettn
+
+--- Website (marketmate.se) ---
+Found 10 analyses
+  Lång DAX (2026-03-22)
+  Köper Husqvarna (2026-03-22)
+  AMD med warranter (2026-03-22)
+  Köper Tesla (2026-03-22)
+  Köper MTG (2026-03-22)
+  Köper DAX för översåld studs! (2026-03-22)
+  Så väljer du rätt börshandlade produkter (ETP): fem faktorer för bättre investeringsbeslut (2026-03-22)
+  Hecla Mining: Amerikas äldsta silvergruva i silvrets nya guldålder (2026-03-22)
+  Börsrally väntar! (2026-03-22)
+  AI-agenter kräver krypto (2026-03-22)
+
+--- Saving to Database ---
+  Skip (exists): Market update 6 mars - Rekylen kom, när har vi botten?
+  Skip (exists): Market update 12 feb - Ökad risk för rekyl!
+  Skip (exists): Guld & Silver - Ett rop på hjälp!
+  Saved: Lång DAX (ID: 17)
+  Saved: Köper Husqvarna (ID: 18)
+  Saved: AMD med warranter (ID: 19)
+  Skip (exists): Köper Tesla
+  Skip (exists): Köper MTG
+  Skip (exists): Köper DAX för översåld studs!
+  Saved: Så väljer du rätt börshandlade produkter (ETP): fem faktorer för bättre investeringsbeslut (ID: 20)
+  Saved: Hecla Mining: Amerikas äldsta silvergruva i silvrets nya guldålder (ID: 21)
+  Saved: Börsrally väntar! (ID: 22)
+  Saved: AI-agenter kräver krypto (ID: 23)
+
+Total saved: 7
+============================================================
+✅ MarketMate: 0 YouTube analyses, 0 website analyses scraped
+
+================================================================================
+✅ WEEKLY AUTOMATION COMPLETE
+================================================================================
+Completed: 2026-03-22 19:05:57
+Syncing database to Railway...
+✅ Database synced to Railway
+Weekly automation completed at Sun Mar 22 19:05:58 CET 2026

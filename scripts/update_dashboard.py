@@ -27,7 +27,9 @@ from src.stock_universe import get_all_swedish_stocks
 from src.screener import calculate_stock_score
 from src.data_fetcher import fetch_stock_data, fetch_current_price
 from src.ma_calculator import calculate_ma50_ma200, calculate_atr
-from src.fundamentals import get_stock_fundamentals
+from src.fundamentals import fetch_fundamentals
+from src.trending_detector import calculate_trending_score, get_trending_stocks, add_trending_analysis
+from src.news_fetcher import fetch_aggregated_market_news, get_market_sentiment_emoji, fetch_stock_news
 
 # Configuration
 CREDENTIALS_PATH = Path(__file__).parent.parent / "config" / "credentials" / "claude-mcp-484313-5647d3a2a087.json"
@@ -38,12 +40,7 @@ PORTFOLIO_FILE = Path(__file__).parent.parent / "config" / "active_portfolio.csv
 def run_screener(stocks: list) -> pd.DataFrame:
     """
     Run the Kavastu screener on all stocks.
-
-    Args:
-        stocks: List of stock tickers
-
-    Returns:
-        DataFrame with screener results sorted by score
+    Returns DataFrame with screener results + trending analysis sorted by score.
     """
     print(f"\n{'=' * 80}")
     print("RUNNING SCREENER")
@@ -51,7 +48,24 @@ def run_screener(stocks: list) -> pd.DataFrame:
     print(f"Scanning {len(stocks)} Swedish stocks...")
 
     results = []
+    stock_data_cache = {}  # NEW: Cache for trending analysis
     total = len(stocks)
+
+    # Fetch OMXS30 benchmark data for relative strength
+    print("Fetching OMXS30 benchmark...")
+    benchmark_df = fetch_stock_data("^OMXS30", period="6mo")
+    if benchmark_df is None or benchmark_df.empty:
+        print("⚠️  Could not fetch benchmark, using defaults")
+        benchmark_returns = {'return_4w': 0.0}
+    else:
+        # Calculate 4-week benchmark return
+        if len(benchmark_df) >= 20:
+            benchmark_4w = ((benchmark_df['Close'].iloc[-1] / benchmark_df['Close'].iloc[-20]) - 1) * 100
+            benchmark_returns = {'return_4w': benchmark_4w}
+        else:
+            benchmark_returns = {'return_4w': 0.0}
+
+    print(f"Benchmark 4-week return: {benchmark_returns['return_4w']:.2f}%")
 
     for i, ticker in enumerate(stocks, 1):
         if i % 10 == 0:
@@ -68,14 +82,16 @@ def run_screener(stocks: list) -> pd.DataFrame:
             df['ATR'] = calculate_atr(df, period=14)
 
             # Get fundamentals
-            fundamentals = get_stock_fundamentals(ticker)
+            fundamentals = fetch_fundamentals(ticker)
 
-            # Calculate score
-            # Note: Need benchmark returns - using dummy for now
-            dummy_benchmark = {'3m': 5.0, '6m': 10.0}
+            # Calculate Kavastu score (0-130 points)
+            dummy_benchmark = (5.0, 10.0)  # Tuple of (3m_return, 6m_return)
             metrics = calculate_stock_score(ticker, df, dummy_benchmark, include_fundamentals=True)
 
             if metrics:
+                # NEW: Calculate trending score
+                trending_metrics = calculate_trending_score(ticker, df, benchmark_returns)
+
                 results.append({
                     'ticker': ticker,
                     'name': ticker.replace('.ST', ''),
@@ -83,23 +99,89 @@ def run_screener(stocks: list) -> pd.DataFrame:
                     'price': df['Close'].iloc[-1],
                     'signal': metrics.get('signal', 'HOLD'),
                     'ma200_trend': metrics.get('ma200_trend', 'Unknown'),
-                    'above_ma200': metrics.get('above_ma200', False)
+                    'above_ma200': metrics.get('above_ma200', False),
+                    # NEW: Trending fields
+                    'trending_score': trending_metrics['trending_score'],
+                    'trending_classification': trending_metrics['classification'],
+                    'trending_reason': trending_metrics['reason'],
+                    'return_4w': trending_metrics['return_4w'],
+                    'rs_vs_benchmark': trending_metrics['rs_vs_benchmark']
                 })
+
+                # Cache for later use
+                stock_data_cache[ticker] = df
 
         except Exception as e:
             print(f"  ⚠️  Error processing {ticker}: {e}")
             continue
 
-    # Create DataFrame and sort by score
+    # Create DataFrame and sort by Kavastu score
     df_results = pd.DataFrame(results)
     if not df_results.empty:
         df_results = df_results.sort_values('score', ascending=False).reset_index(drop=True)
 
     print(f"\n✅ Screener complete: {len(df_results)} stocks ranked")
     print(f"\nTop 10 stocks:")
-    print(df_results.head(10)[['ticker', 'score', 'price', 'signal']].to_string(index=False))
+    print(df_results.head(10)[['ticker', 'score', 'trending_score', 'trending_classification']].to_string(index=False))
 
     return df_results
+
+
+def extract_trending_stocks(screener_results: pd.DataFrame) -> dict:
+    """
+    Extract hot and cold trending stocks from screener results.
+
+    Args:
+        screener_results: DataFrame with trending analysis
+
+    Returns:
+        {
+            'hot_stocks': List of top 10 hot trending stocks,
+            'cold_stocks': List of top 10 cold trending stocks
+        }
+    """
+    if screener_results.empty or 'trending_score' not in screener_results.columns:
+        return {'hot_stocks': [], 'cold_stocks': []}
+
+    # Sort by trending score
+    by_trending = screener_results.sort_values('trending_score', ascending=False)
+
+    # Top 10 hot stocks (highest trending scores)
+    hot_stocks = []
+    for _, row in by_trending.head(10).iterrows():
+        if row['trending_classification'] in ['HOT', 'NEUTRAL']:
+            hot_stocks.append({
+                'ticker': row['ticker'],
+                'name': row['name'],
+                'kavastu_score': row['score'],
+                'trending_score': row['trending_score'],
+                'classification': row['trending_classification'],
+                'return_4w': row['return_4w'],
+                'reason': row['trending_reason'],
+                'price': row['price'],
+                'signal': row['signal']
+            })
+
+    # Bottom 10 cold stocks (lowest trending scores)
+    cold_stocks = []
+    for _, row in by_trending.tail(10).iterrows():
+        if row['trending_classification'] in ['COLD', 'NEUTRAL']:
+            cold_stocks.append({
+                'ticker': row['ticker'],
+                'name': row['name'],
+                'kavastu_score': row['score'],
+                'trending_score': row['trending_score'],
+                'classification': row['trending_classification'],
+                'return_4w': row['return_4w'],
+                'reason': row['trending_reason'],
+                'price': row['price'],
+                'signal': row['signal']
+            })
+
+    return {
+        'hot_stocks': hot_stocks[:10],
+        'cold_stocks': cold_stocks[:10]
+    }
 
 
 def load_current_portfolio() -> pd.DataFrame:
@@ -120,14 +202,10 @@ def load_current_portfolio() -> pd.DataFrame:
 
 def generate_trade_recommendations(screener_results: pd.DataFrame, current_portfolio: pd.DataFrame) -> tuple:
     """
-    Generate buy and sell recommendations based on screener results and current holdings.
-
-    Args:
-        screener_results: DataFrame from screener
-        current_portfolio: DataFrame with current holdings
+    Generate buy and sell recommendations with explanations and news.
 
     Returns:
-        Tuple of (buy_list, sell_list)
+        Tuple of (buy_list, sell_list) with enhanced context
     """
     print(f"\n{'=' * 80}")
     print("GENERATING TRADE RECOMMENDATIONS")
@@ -153,13 +231,42 @@ def generate_trade_recommendations(screener_results: pd.DataFrame, current_portf
     ].head(10)  # Limit to top 10 buy signals
 
     for _, row in buy_candidates.iterrows():
+        ticker = row['ticker']
+        score = row['score']
+        price = row['price']
+
+        # Build "why buy" explanation
+        why_buy = []
+        why_buy.append(f"Score {score:.0f}/130 (Top 70)")
+
+        if row.get('above_ma200', False):
+            ma_trend = row.get('ma200_trend', 'Unknown')
+            why_buy.append(f"Above MA200, {ma_trend.lower()} trend")
+
+        if 'rs_vs_benchmark' in row:
+            rs = row['rs_vs_benchmark']
+            if rs > 0:
+                why_buy.append(f"Outperforming OMXS30 by {rs:.1f}%")
+            else:
+                why_buy.append(f"Slight underperformance ({rs:.1f}%)")
+
+        if 'trending_classification' in row:
+            if row['trending_classification'] == 'HOT':
+                why_buy.append(f"🔥 Trending HOT ({row['trending_score']:.0f}/100)")
+
+        # Fetch latest news (top 1 article)
+        news = fetch_stock_news(ticker, max_articles=1)
+        news_headline = news[0]['title'][:50] + '...' if news else 'No recent news'
+
         buy_list.append({
-            'ticker': row['ticker'],
-            'score': row['score'],
-            'price': row['price'],
+            'ticker': ticker,
+            'score': score,
+            'price': price,
             'shares': 0,  # Will be calculated based on ATR sizing
             'amount': 0,  # Will be calculated
-            'reason': f"Score {row['score']} (top 70, not owned)"
+            'reason': f"Score {score:.0f} (top 70, not owned)",
+            'why_buy': ' • '.join(why_buy),
+            'news_headline': news_headline
         })
 
     # SELL signals: Current holdings that dropped out of top 70 OR score < 90
@@ -167,31 +274,59 @@ def generate_trade_recommendations(screener_results: pd.DataFrame, current_portf
         stock_data = screener_results[screener_results['ticker'] == ticker]
 
         if stock_data.empty:
-            # Stock not in screener results (data fetch failed)
             continue
 
-        score = stock_data.iloc[0]['score']
+        row = stock_data.iloc[0]
+        score = row['score']
         in_top_70 = ticker in top_tickers
 
         if score < 90 or not in_top_70:
-            reason = f"Score dropped to {score}" if score < 90 else "Dropped out of top 70"
+            # Build "why sell" explanation
+            why_sell = []
+
+            if score < 90:
+                why_sell.append(f"Score dropped to {score:.0f} (below threshold)")
+
+            if not in_top_70:
+                why_sell.append("Fell out of top 70 ranking")
+
+            if not row.get('above_ma200', True):
+                ma_trend = row.get('ma200_trend', 'Unknown')
+                why_sell.append(f"Below MA200, {ma_trend.lower()} trend")
+
+            if 'rs_vs_benchmark' in row:
+                rs = row['rs_vs_benchmark']
+                if rs < -3:
+                    why_sell.append(f"Underperforming OMXS30 by {abs(rs):.1f}%")
+
+            if 'trending_classification' in row:
+                if row['trending_classification'] == 'COLD':
+                    why_sell.append(f"❄️  Trending COLD ({row['trending_score']:.0f}/100)")
+
+            # Fetch latest news
+            news = fetch_stock_news(ticker, max_articles=1)
+            news_headline = news[0]['title'][:50] + '...' if news else 'No recent news'
 
             sell_list.append({
                 'ticker': ticker,
                 'score': score,
                 'current_value': 0,  # Will be calculated from portfolio
-                'reason': reason
+                'reason': f"Score {score:.0f}" if score < 90 else "Out of top 70",
+                'why_sell': ' • '.join(why_sell),
+                'news_headline': news_headline
             })
 
     print(f"\n🟢 BUY SIGNALS: {len(buy_list)}")
     if buy_list:
         for b in buy_list:
-            print(f"  {b['ticker']}: Score {b['score']:.0f} - {b['reason']}")
+            print(f"  {b['ticker']}: Score {b['score']:.0f}")
+            print(f"    Why: {b['why_buy']}")
 
     print(f"\n🔴 SELL SIGNALS: {len(sell_list)}")
     if sell_list:
         for s in sell_list:
-            print(f"  {s['ticker']}: Score {s['score']:.0f} - {s['reason']}")
+            print(f"  {s['ticker']}: Score {s['score']:.0f}")
+            print(f"    Why: {s['why_sell']}")
 
     return buy_list, sell_list
 
@@ -235,8 +370,38 @@ def calculate_portfolio_metrics(current_portfolio: pd.DataFrame) -> dict:
     return metrics
 
 
+def fetch_market_context() -> dict:
+    """
+    Fetch aggregated market news for trading context.
+
+    Returns:
+        Dict with market news and sentiment analysis
+    """
+    print(f"\n{'=' * 80}")
+    print("FETCHING MARKET CONTEXT")
+    print(f"{'=' * 80}")
+
+    market_news = fetch_aggregated_market_news(max_articles=15)
+
+    print(f"\n📰 Market News Summary:")
+    print(f"  Total articles: {market_news['total_articles']}")
+    print(f"  Overall sentiment: {market_news['sentiment_summary']['overall_sentiment'].upper()}")
+    print(f"  🟢 Positive: {market_news['sentiment_summary']['positive_count']}")
+    print(f"  🔴 Negative: {market_news['sentiment_summary']['negative_count']}")
+    print(f"  🟡 Neutral: {market_news['sentiment_summary']['neutral_count']}")
+
+    print(f"\n  Latest headlines:")
+    for i, article in enumerate(market_news['articles'][:5], 1):
+        emoji = get_market_sentiment_emoji(article['sentiment'])
+        print(f"    {emoji} {article['title'][:70]}...")
+
+    return market_news
+
+
 def update_google_sheets(screener_results: pd.DataFrame, buy_list: list, sell_list: list,
-                         current_portfolio: pd.DataFrame, metrics: dict, spreadsheet_name: str):
+                         current_portfolio: pd.DataFrame, metrics: dict,
+                         market_context: dict, trending_data: dict,
+                         spreadsheet_name: str):
     """
     Update all Google Sheets with latest data.
 
@@ -246,6 +411,8 @@ def update_google_sheets(screener_results: pd.DataFrame, buy_list: list, sell_li
         sell_list: List of sell recommendations
         current_portfolio: DataFrame with current holdings
         metrics: Dict with portfolio metrics
+        market_context: Market news and sentiment analysis
+        trending_data: Hot and cold stocks from trending detector
         spreadsheet_name: Name of the Google Spreadsheet
     """
     print(f"\n{'=' * 80}")
@@ -263,8 +430,25 @@ def update_google_sheets(screener_results: pd.DataFrame, buy_list: list, sell_li
         print(f"❌ Failed to open spreadsheet '{spreadsheet_name}'")
         return False
 
+    # Update Executive Summary (Layer 1 - main dashboard)
+    print("\n📊 Updating Executive Summary (Layer 1)...")
+    manager.update_executive_summary(
+        portfolio_metrics=metrics,
+        market_context=market_context,
+        trending_data=trending_data,
+        buy_list=buy_list,
+        sell_list=sell_list
+    )
+
+    # Update Trending Deep Dive (Layer 2)
+    print("📊 Updating Trending Deep Dive (Layer 2)...")
+    manager.update_trending_deep_dive(
+        trending_data=trending_data,
+        screener_results=screener_results
+    )
+
     # Update Sheet 1: Portfolio Overview
-    print("\n📊 Updating Portfolio Overview...")
+    print("📊 Updating Portfolio Overview...")
     manager.update_portfolio_overview(metrics, metrics['holdings_count'])
 
     # Update Sheet 2: Current Holdings
@@ -325,13 +509,30 @@ def main():
     # 1. Load current portfolio
     current_portfolio = load_current_portfolio()
 
-    # 2. Run screener
+    # 2. Fetch market context
+    market_context = fetch_market_context()
+
+    # 3. Run screener
     stocks = get_all_swedish_stocks()
     screener_results = run_screener(stocks)
 
     if screener_results.empty:
         print("❌ Screener returned no results")
         return
+
+    # NEW: Extract trending stocks
+    trending_data = extract_trending_stocks(screener_results)
+
+    print(f"\n{'=' * 80}")
+    print("TRENDING STOCKS ANALYSIS")
+    print(f"{'=' * 80}")
+    print(f"\n🔥 HOT STOCKS (Top 10):")
+    for i, stock in enumerate(trending_data['hot_stocks'], 1):
+        print(f"  {i}. {stock['ticker']}: {stock['trending_score']:.0f}/100 - {stock['reason']}")
+
+    print(f"\n❄️  COLD STOCKS (Bottom 10):")
+    for i, stock in enumerate(trending_data['cold_stocks'], 1):
+        print(f"  {i}. {stock['ticker']}: {stock['trending_score']:.0f}/100 - {stock['reason']}")
 
     # 3. Generate trade recommendations
     buy_list, sell_list = generate_trade_recommendations(screener_results, current_portfolio)
@@ -347,6 +548,8 @@ def main():
             sell_list,
             current_portfolio,
             metrics,
+            market_context,
+            trending_data,
             args.spreadsheet
         )
     else:

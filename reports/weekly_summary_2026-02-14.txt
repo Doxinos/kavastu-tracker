@@ -1,0 +1,46 @@
+
+================================================================================
+KAVASTU WEEKLY SUMMARY - 2026-02-14
+================================================================================
+
+📊 PORTFOLIO SNAPSHOT
+   Total Value:         100,000 SEK
+   Cash:                 10,000 SEK
+   Invested:             90,000 SEK
+   Week Return:            0.00%
+   Holdings:                  0 stocks
+
+📈 SCREENER RESULTS
+   Stocks Scanned:           10
+   Top Score:            BOL.ST (116.3)
+
+   Trending:
+   🔥 HOT:                    1 stocks
+   ❄️  COLD:                   1 stocks
+   ➖ NEUTRAL:                 8 stocks
+
+🏆 TOP 10 STOCKS
+    1. BOL.ST       Score: 116.3  ➖ Trending:  65/100
+    2. EPI-B.ST     Score: 111.2  ➖ Trending:  70/100
+    3. ABB.ST       Score: 110.8  🔥 Trending:  75/100
+    4. ATCO-A.ST    Score: 110.0  ➖ Trending:  32/100
+    5. ATCO-B.ST    Score: 105.7  ➖ Trending:  32/100
+    6. ERIC-B.ST    Score: 101.3  ➖ Trending:  70/100
+    7. AZN.ST       Score: 100.4  ➖ Trending:  65/100
+    8. ALFA.ST      Score:  95.6  ❄️ Trending:  25/100
+    9. ASSA-B.ST    Score:  85.5  ➖ Trending:  40/100
+   10. ESSITY-B.ST  Score:  75.6  ➖ Trending:  65/100
+
+🔥 TOP 5 HOT TRENDING STOCKS
+   ABB.ST        75/100 - 4-week return +17.4%, outperforming OMXS30 by 17.4%, volume up 15%
+
+🎯 TRADE RECOMMENDATIONS
+   No buy signals this week
+
+   No sell signals this week
+
+💾 DATABASE
+   Snapshot ID:               4
+   Stocks Saved:             10
+
+================================================================================

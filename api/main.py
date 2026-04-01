@@ -77,6 +77,7 @@ class ScreenerStock(BaseModel):
     momentum_3m: Optional[float] = None
     momentum_6m: Optional[float] = None
     quality_score: Optional[float] = None
+    sell_signal: Optional[str] = None
 
 class TradeSignal(BaseModel):
     ticker: str
@@ -93,6 +94,7 @@ class DashboardSummary(BaseModel):
     hot_stocks: List[ScreenerStock]
     cold_stocks: List[ScreenerStock]
     buy_signals: List[TradeSignal]
+    sell_signals: List[TradeSignal]
     total_screened: int
     last_updated: str
 
@@ -131,7 +133,8 @@ def row_to_screener_stock(row) -> ScreenerStock:
         rs_rating=row.get('rs_rating'),
         momentum_3m=row.get('momentum_3m'),
         momentum_6m=row.get('momentum_6m'),
-        quality_score=row.get('quality_score')
+        quality_score=row.get('quality_score'),
+        sell_signal=row.get('sell_signal') or None
     )
 
 
@@ -188,6 +191,31 @@ def get_dashboard():
                     reason=f"Score {stock.score:.0f}/130 • Trending {stock.trending_classification} ({stock.trending_score:.0f}/100)"
                 ))
 
+        # Generate sell signals from stored data or live calculation
+        sell_signals = []
+        for stock in all_stocks:
+            if stock.sell_signal:
+                sell_signals.append(TradeSignal(
+                    ticker=stock.ticker,
+                    action="SELL",
+                    score=stock.score,
+                    trending_score=stock.trending_score,
+                    trending_classification=stock.trending_classification,
+                    price=stock.price,
+                    reason=stock.sell_signal
+                ))
+            elif stock.ma200_trend in ('Bearish', 'Below') and stock.trending_classification == 'COLD':
+                # Fallback: generate sell signal from existing data even if column not populated yet
+                sell_signals.append(TradeSignal(
+                    ticker=stock.ticker,
+                    action="SELL",
+                    score=stock.score,
+                    trending_score=stock.trending_score,
+                    trending_classification=stock.trending_classification,
+                    price=stock.price,
+                    reason=f"MA200 {stock.ma200_trend} • COLD trend ({stock.trending_score:.0f}/100)"
+                ))
+
         last_updated = snapshot_row['date'] if snapshot_row else "Never"
 
         return DashboardSummary(
@@ -196,6 +224,7 @@ def get_dashboard():
             hot_stocks=hot_stocks[:10],
             cold_stocks=cold_stocks[:10],
             buy_signals=buy_signals,
+            sell_signals=sell_signals[:10],
             total_screened=len(all_stocks),
             last_updated=last_updated
         )

@@ -174,9 +174,48 @@ def generate_trade_recommendations(screener_results: pd.DataFrame) -> dict:
             'reason': f"Score {stock['score']:.0f}/130 (Top Tier) • Trending {stock['trending_classification']} ({stock['trending_score']:.0f}/100) • Above MA200"
         })
 
+    # Sell signal criteria:
+    # 1. Price dropped below MA200 (trend broken)
+    # 2. Death cross potential: MA200 trend is Bearish or Below
+    # 3. Score dropped significantly (below 30)
+    # 4. COLD trending (score <= 25) — momentum collapsed
+    sell_signals = []
+
+    sell_candidates = screener_results[
+        (screener_results['above_ma200'] == False) |  # Below MA200
+        (screener_results['ma200_trend'].isin(['Bearish', 'Below'])) |  # Bearish MA200
+        ((screener_results['score'] < 30) & (screener_results['trending_classification'] == 'COLD'))  # Low score + cold
+    ].copy()
+
+    # Only flag stocks that are actually worth mentioning (had some score, or are in top universe)
+    sell_candidates = sell_candidates[sell_candidates['score'] > 0]
+
+    for _, stock in sell_candidates.iterrows():
+        reasons = []
+        if not stock.get('above_ma200', True):
+            reasons.append('Under MA200')
+        if stock.get('ma200_trend') in ('Bearish', 'Below'):
+            reasons.append(f"MA200 {stock['ma200_trend']}")
+        if stock.get('trending_classification') == 'COLD':
+            reasons.append(f"COLD trend ({stock['trending_score']:.0f}/100)")
+        if stock.get('score', 100) < 30:
+            reasons.append(f"Låg score ({stock['score']:.0f})")
+
+        sell_signals.append({
+            'ticker': stock['ticker'],
+            'score': stock['score'],
+            'trending_score': stock['trending_score'],
+            'trending_classification': stock['trending_classification'],
+            'price': stock['price'],
+            'reason': ' • '.join(reasons)
+        })
+
+    # Sort by score ascending (worst first)
+    sell_signals.sort(key=lambda x: x['score'])
+
     return {
         'buy_signals': buy_signals,
-        'sell_signals': []  # Will implement sell logic when we have portfolio tracking
+        'sell_signals': sell_signals[:20]  # Top 20 sell signals
     }
 
 
@@ -341,6 +380,17 @@ def run_weekly_automation(portfolio_value: float = 100000, cash: float = 10000):
                         top_stocks = pd.concat([top_stocks, pd.DataFrame([placeholder])], ignore_index=True)
                     print(f"   Added {len(missing_watchlist)} watchlist stocks as placeholders (no data)")
 
+        # Generate trade recommendations before saving (so sell_signal column is populated)
+        print("\n🎯 Generating trade recommendations...")
+        recommendations = generate_trade_recommendations(screener_results)
+        print(f"   {len(recommendations['buy_signals'])} buy signals, {len(recommendations['sell_signals'])} sell signals")
+
+        # Write sell_signal reason into the DataFrame
+        sell_lookup = {s['ticker']: s['reason'] for s in recommendations['sell_signals']}
+        if 'sell_signal' not in top_stocks.columns:
+            top_stocks['sell_signal'] = ''
+        top_stocks['sell_signal'] = top_stocks['ticker'].map(lambda t: sell_lookup.get(t, ''))
+
         db.save_screener_results(snapshot_id, today, top_stocks)
         print(f"✅ Saved {len(top_stocks)} stocks to database")
 
@@ -350,11 +400,6 @@ def run_weekly_automation(portfolio_value: float = 100000, cash: float = 10000):
             print(f"   Database size: {db_size:.1f} KB")
         else:
             print(f"   Database: PostgreSQL (Supabase)")
-
-    # 3. Generate trade recommendations
-    print("\n🎯 Step 3/5: Generating trade recommendations...")
-    recommendations = generate_trade_recommendations(screener_results)
-    print(f"✅ {len(recommendations['buy_signals'])} buy signals, {len(recommendations['sell_signals'])} sell signals")
 
     # 4. Create and save weekly summary
     print("\n📝 Step 4/5: Creating weekly summary...")

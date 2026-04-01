@@ -1,0 +1,67 @@
+
+================================================================================
+KAVASTU WEEKLY SUMMARY - 2026-03-02
+================================================================================
+
+📊 PORTFOLIO SNAPSHOT
+   Total Value:         100,000 SEK
+   Cash:                 10,000 SEK
+   Invested:             90,000 SEK
+   Week Return:            0.00%
+   Holdings:                  0 stocks
+
+📈 SCREENER RESULTS
+   Stocks Scanned:          241
+   Top Score:           DOFG.OL (129.2)
+
+   Trending:
+   🔥 HOT:                   29 stocks
+   ❄️  COLD:                  69 stocks
+   ➖ NEUTRAL:               143 stocks
+
+🏆 TOP 10 STOCKS
+    1. DOFG.OL      Score: 129.2  🔥 Trending:  75/100
+    2. LRCX         Score: 128.7  ➖ Trending:  27/100
+    3. FRO.OL       Score: 126.9  🔥 Trending:  90/100
+    4. WAWI.OL      Score: 121.7  🔥 Trending:  82/100
+    5. CAT          Score: 121.5  ➖ Trending:  65/100
+    6. AMAT         Score: 121.1  🔥 Trending:  75/100
+    7. ASML         Score: 121.1  ➖ Trending:  35/100
+    8. KLAC         Score: 120.2  ➖ Trending:  52/100
+    9. SAND.ST      Score: 119.7  ➖ Trending:  55/100
+   10. LMT          Score: 119.7  ➖ Trending:  27/100
+
+🔥 TOP 5 HOT TRENDING STOCKS
+   DOFG.OL       75/100 - 4-week return +14.3%, outperforming OMXS30 by 14.3%, volume down 2%
+   FRO.OL        90/100 - 4-week return +38.0%, outperforming OMXS30 by 38.0%, volume up 2%
+   WAWI.OL       82/100 - 4-week return +15.2%, outperforming OMXS30 by 15.2%, volume up 10%
+   AMAT          75/100 - 4-week return +15.7%, outperforming OMXS30 by 15.7%, volume up 16%
+   HAUTO.OL      95/100 - 4-week return +24.5%, outperforming OMXS30 by 24.5%, volume up 49%
+
+🎯 TRADE RECOMMENDATIONS
+   🟢 BUY SIGNALS: 17
+      DOFG.OL: Score 129/130 (Top Tier) • Trending HOT (75/100) • Above MA200
+      FRO.OL: Score 127/130 (Top Tier) • Trending HOT (90/100) • Above MA200
+      WAWI.OL: Score 122/130 (Top Tier) • Trending HOT (82/100) • Above MA200
+      AMAT: Score 121/130 (Top Tier) • Trending HOT (75/100) • Above MA200
+      HAUTO.OL: Score 116/130 (Top Tier) • Trending HOT (95/100) • Above MA200
+      CLA-B.ST: Score 114/130 (Top Tier) • Trending HOT (75/100) • Above MA200
+      MPCC.OL: Score 114/130 (Top Tier) • Trending HOT (90/100) • Above MA200
+      KOG.OL: Score 114/130 (Top Tier) • Trending HOT (75/100) • Above MA200
+      GE: Score 113/130 (Top Tier) • Trending HOT (80/100) • Above MA200
+      HANZA.ST: Score 112/130 (Top Tier) • Trending HOT (95/100) • Above MA200
+      AKSO.OL: Score 111/130 (Top Tier) • Trending HOT (87/100) • Above MA200
+      PEAB-B.ST: Score 111/130 (Top Tier) • Trending HOT (80/100) • Above MA200
+      INSTAL.ST: Score 109/130 (Top Tier) • Trending HOT (85/100) • Above MA200
+      VAR.OL: Score 108/130 (Top Tier) • Trending HOT (80/100) • Above MA200
+      BWLPG.OL: Score 107/130 (Top Tier) • Trending HOT (85/100) • Above MA200
+      ATT.ST: Score 105/130 (Top Tier) • Trending NEUTRAL (70/100) • Above MA200
+      COOR.ST: Score 100/130 (Top Tier) • Trending HOT (75/100) • Above MA200
+
+   No sell signals this week
+
+💾 DATABASE
+   Snapshot ID:              10
+   Stocks Saved:            241
+
+================================================================================
