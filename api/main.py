@@ -1107,6 +1107,29 @@ def dedup_screener(secret: str = ""):
         return {"status": "ok", "deleted": deleted}
 
 
+@app.post("/api/admin/cleanup-market-analysis")
+def cleanup_market_analysis(secret: str = "", keep_days: int = 30):
+    """Delete market analysis entries older than keep_days (default 30)."""
+    if secret != "kavastu2026sync":
+        return {"status": "error", "message": "Invalid secret"}
+    with get_db() as db:
+        cursor = db._cursor()
+        p = '%s' if db.db_type == 'postgres' else '?'
+        if db.db_type == 'postgres':
+            cursor.execute(f"""
+                DELETE FROM market_analysis
+                WHERE date < (CURRENT_DATE - INTERVAL '{keep_days} days')::text
+            """)
+        else:
+            cursor.execute(f"""
+                DELETE FROM market_analysis
+                WHERE date < date('now', '-{keep_days} days')
+            """)
+        deleted = cursor.rowcount
+        db.conn.commit()
+        return {"status": "ok", "deleted": deleted, "keep_days": keep_days}
+
+
 # --- Admin: Daily price refresh (lightweight) ---
 
 _price_status = {"running": False, "last_run": None, "last_result": None}
