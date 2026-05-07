@@ -38,26 +38,33 @@ def generate_market_synthesis() -> Dict:
     - portfolio_impact: actionable summary
     """
     with PortfolioDB() as db:
-        # Get latest MarketMate YouTube analysis
+        # Pick the most recent macro analysis: a YouTube video, or a website
+        # article without stock-specific buy_signals (those are macro posts like
+        # "Börskrasch i juni" rather than stock calls like "Köper Tele2").
         all_analyses = db.get_market_analyses(limit=30)
-        mm_youtube = None
+        mm_macro = None
         for a in all_analyses:
-            if a.get('source_type') == 'youtube' and a.get('regime'):
-                mm_youtube = a
+            if not a.get('regime'):
+                continue
+            if a.get('source_type') == 'youtube':
+                mm_macro = a
+                break
+            if a.get('source_type') == 'website' and not a.get('buy_signals'):
+                mm_macro = a
                 break
 
-        if not mm_youtube:
+        if not mm_macro:
             return {
                 'available': False,
-                'reason': 'Ingen MarketMate-video analyserad ännu',
+                'reason': 'Ingen MarketMate-analys tillgänglig ännu',
             }
 
-        # Get MarketMate website buy signals from the same period as the latest video
-        # Only include website analyses from the video date onward (not old ones)
-        video_date = mm_youtube.get('date', '')
+        # Aggregate buy/sell signals from website articles published on or after
+        # the macro source's date.
+        macro_date = mm_macro.get('date', '')
         mm_website = [
             a for a in all_analyses
-            if a.get('source_type') == 'website' and a.get('date', '') >= video_date
+            if a.get('source_type') == 'website' and a.get('date', '') >= macro_date
         ]
         mm_buy_tickers = set()
         mm_sell_tickers = set()
@@ -69,11 +76,11 @@ def generate_market_synthesis() -> Dict:
                 if sig.get('ticker'):
                     mm_sell_tickers.add(sig['ticker'])
 
-        # Also get buy/sell from the YouTube video itself
-        for sig in (mm_youtube.get('buy_signals') or []):
+        # Include buy/sell from the macro source itself
+        for sig in (mm_macro.get('buy_signals') or []):
             if sig.get('ticker'):
                 mm_buy_tickers.add(sig['ticker'])
-        for sig in (mm_youtube.get('sell_signals') or []):
+        for sig in (mm_macro.get('sell_signals') or []):
             if sig.get('ticker'):
                 mm_sell_tickers.add(sig['ticker'])
 
@@ -106,7 +113,7 @@ def generate_market_synthesis() -> Dict:
     our_regime = get_market_regime()
 
     # === 1. REGIME ALIGNMENT ===
-    mm_regime = mm_youtube.get('regime', 'UNKNOWN')
+    mm_regime = mm_macro.get('regime', 'UNKNOWN')
     our_regime_label = our_regime.get('regime', 'unknown')
 
     mm_score = REGIME_SCALE.get(mm_regime, 0)
@@ -130,7 +137,7 @@ def generate_market_synthesis() -> Dict:
         alignment_description = f'MarketMate ser {_regime_swedish(mm_regime)} medan vår modell ser {_regime_swedish(our_regime_label)}. Stor skillnad - var försiktig!'
 
     # === 2. STOCK OVERLAP ===
-    mm_all_tickers = set(mm_youtube.get('tickers_mentioned', []))
+    mm_all_tickers = set(mm_macro.get('tickers_mentioned', []))
     mm_all_tickers.update(mm_buy_tickers)
 
     # Stocks MarketMate likes that we also rank high
@@ -209,22 +216,23 @@ def generate_market_synthesis() -> Dict:
             impact_points.append(f'Varning: {c["description"]}')
 
     # SP500 target from MarketMate
-    targets = mm_youtube.get('targets', {})
+    targets = mm_macro.get('targets', {})
     if targets.get('sp500_target'):
         impact_points.append(f'MarketMate S&P 500 target: {targets["sp500_target"]}')
 
     return {
         'available': True,
         'generated_at': datetime.now().strftime('%Y-%m-%d %H:%M'),
-        'mm_video_date': mm_youtube.get('date', ''),
-        'mm_video_title': mm_youtube.get('title', ''),
-        'mm_video_url': mm_youtube.get('url', ''),
+        'mm_video_date': mm_macro.get('date', ''),
+        'mm_video_title': mm_macro.get('title', ''),
+        'mm_video_url': mm_macro.get('url', ''),
+        'mm_source_type': mm_macro.get('source_type', ''),
 
         # Regime comparison
         'regime': {
             'mm_regime': mm_regime,
             'our_regime': our_regime_label,
-            'mm_index_view': mm_youtube.get('summary', ''),
+            'mm_index_view': mm_macro.get('summary', ''),
             'our_index_vs_ma200': our_regime.get('index_vs_ma200'),
             'alignment': alignment,
             'alignment_label': alignment_label,
